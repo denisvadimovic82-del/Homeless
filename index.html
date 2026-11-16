@@ -44,32 +44,32 @@
   .tbtn:active { background:rgba(232,184,96,0.25); border-color:var(--accent); color:var(--accent); }
 
   /* ===== СЕТКА КНОПОК ===== */
-  /* Шаг по X: 67px (56 + 11px зазор). Шаг по Y: 75px (56 + 19px зазор) */
+  /* Шаг по X: 69px (56 + 13px зазор). Шаг по Y: 73px (56 + 17px зазор) */
   .tbtn { position:absolute; width:calc(56px * var(--ui-scale)); height:calc(56px * var(--ui-scale)); background:var(--panel); border:2px solid var(--border); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:calc(20px * var(--ui-scale)); color:#ccc; z-index:20; }
   
-  /* ЛЕВАЯ ПАНЕЛЬ: вертикальный столбец 🏆 / ⤒ / ◀ и ▶ справа от ◀ */
-  #btnRecord { left:calc(var(--safe-left) + 14px); bottom:calc(var(--safe-bottom) + 164px); background:#2a3a4a; border-color:#4a5a8a; }
-  #btnJump   { left:calc(var(--safe-left) + 14px); bottom:calc(var(--safe-bottom) + 89px); }
+  /* ЛЕВАЯ ПАНЕЛЬ: вертикальный столбец 🏆 / ⤒ / ◀, ▶ справа от ◀ */
+  #btnRecord { left:calc(var(--safe-left) + 14px); bottom:calc(var(--safe-bottom) + 160px); background:#2a3a4a; border-color:#4a5a8a; }
+  #btnJump   { left:calc(var(--safe-left) + 14px); bottom:calc(var(--safe-bottom) + 87px); }
   #btnLeft   { left:calc(var(--safe-left) + 14px); bottom:calc(var(--safe-bottom) + 14px); }
-  #btnRight  { left:calc(var(--safe-left) + 81px); bottom:calc(var(--safe-bottom) + 14px); }
+  #btnRight  { left:calc(var(--safe-left) + 83px); bottom:calc(var(--safe-bottom) + 14px); }
 
   /* ПРАВАЯ СТОРОНА (ДЕЙСТВИЯ) */
   /* 1-й ряд (снизу) */
   #btnPick   { right:calc(var(--safe-right) + 14px); bottom:calc(var(--safe-bottom) + 14px); }
-  #btnCraft  { right:calc(var(--safe-right) + 81px); bottom:calc(var(--safe-bottom) + 14px); }
-  #btnThrow  { right:calc(var(--safe-right) + 148px); bottom:calc(var(--safe-bottom) + 14px); background:#3a2a1a; border-color:#8a5a2a; display:none; }
+  #btnCraft  { right:calc(var(--safe-right) + 83px); bottom:calc(var(--safe-bottom) + 14px); }
+  #btnThrow  { right:calc(var(--safe-right) + 152px); bottom:calc(var(--safe-bottom) + 14px); background:#3a2a1a; border-color:#8a5a2a; display:none; }
 
   /* 2-й ряд (середина) */
-  #btnAttack { right:calc(var(--safe-right) + 14px); bottom:calc(var(--safe-bottom) + 89px); }
-  #btnInv    { right:calc(var(--safe-right) + 81px); bottom:calc(var(--safe-bottom) + 89px); }
-  #btnDog    { right:calc(var(--safe-right) + 148px); bottom:calc(var(--safe-bottom) + 89px); background:#3a2a1a; border-color:#c8a050; display:none; }
+  #btnAttack { right:calc(var(--safe-right) + 14px); bottom:calc(var(--safe-bottom) + 87px); }
+  #btnInv    { right:calc(var(--safe-right) + 83px); bottom:calc(var(--safe-bottom) + 87px); }
+  #btnDog    { right:calc(var(--safe-right) + 152px); bottom:calc(var(--safe-bottom) + 87px); background:#3a2a1a; border-color:#c8a050; display:none; }
   #btnDog.feed { border-color:#6c6; box-shadow:0 0 10px rgba(108,204,108,0.5); }
   #btnDog:disabled { opacity:0.4; filter:grayscale(0.7); }
 
   /* 3-й ряд (сверху) */
-  #btnSit    { right:calc(var(--safe-right) + 14px); bottom:calc(var(--safe-bottom) + 164px); background:#4a3a2a; border-color:#8a6a4a; }
-  #ctxBtn    { right:calc(var(--safe-right) + 81px); bottom:calc(var(--safe-bottom) + 164px); background:#2a4a2a; border-color:#4a8a4a; display:none; }
-  #ctxBtnHide{ right:calc(var(--safe-right) + 148px); bottom:calc(var(--safe-bottom) + 164px); background:#2a2a4a; border-color:#4a4a8a; display:none; }
+  #btnSit    { right:calc(var(--safe-right) + 14px); bottom:calc(var(--safe-bottom) + 160px); background:#4a3a2a; border-color:#8a6a4a; }
+  #ctxBtn    { right:calc(var(--safe-right) + 83px); bottom:calc(var(--safe-bottom) + 160px); background:#2a4a2a; border-color:#4a8a4a; display:none; }
+  #ctxBtnHide{ right:calc(var(--safe-right) + 152px); bottom:calc(var(--safe-bottom) + 160px); background:#2a2a4a; border-color:#4a4a8a; display:none; }
 
   #deathScreen { position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.95); display:none; align-items:center; justify-content:center; flex-direction:column; color:#d34b4b; font-family:monospace; text-align:center; padding:20px; }
   #deathScreen h1 { font-size:40px; margin-bottom:20px; text-shadow:0 0 20px #d34b4b; }
@@ -939,14 +939,18 @@ function completeGrandmaHelp(g) {
   grandmaEventActive = false;
 }
 
-// === ИСПРАВЛЕНО: спавн бомжа в зоне видимости игрока, а не в левом верхнем углу ===
+// === ИСПРАВЛЕНО: спавн бомжа привязан к камере + банка рядом с бомжем, оба на дороге ===
 function spawnBeggar() {
   if (beggarNpc && beggarNpc.active) return;
   const scene = game.scene.scenes[0]; if (!scene || !player) return;
   const groundY = scene.groundY;
+  // Берём видимую область экрана (камеры), а не мировые координаты игрока
+  const camW = scene.scale.width;
+  const camLeft = scene.cameras.main.scrollX;
   const side = Math.random() < 0.5 ? -1 : 1;
-  const dist = 120 + Math.random() * 280;
-  const bx = player.x + side * dist;
+  // Смещение от центра экрана: от 20% до 40% ширины в выбранную сторону
+  const offset = camW * (0.2 + Math.random() * 0.2);
+  const bx = camLeft + camW/2 + side * offset;
   beggarNpc = scene.physics.add.sprite(bx, groundY - 14, 'bum_sit').setDepth(15);
   beggarNpc.body.setSize(24, 28);
   beggarNpc.body.setOffset(4, 28);
@@ -954,6 +958,7 @@ function spawnBeggar() {
   beggarNpc.hp = 10; beggarNpc.maxHp = 10;
   beggarNpc.setTint(0x888888);
   scene.physics.add.collider(beggarNpc, scene.groundBody);
+  // Банка ставится рядом с бомжем на дороге
   beggarNpc.begCan = scene.add.sprite(bx + 18, groundY - 6, 'can').setDepth(14);
   npcs.push(beggarNpc);
   log('🧎 Бомж сидит на земле и просит милостыню.');
