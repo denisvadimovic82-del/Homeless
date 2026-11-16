@@ -27,7 +27,6 @@
   #weatherText { font-size:calc(11px * var(--ui-scale)); color:#fff; }
   #questBox { position:absolute; top:calc(var(--safe-top) + 100px); left:50%; transform:translateX(-50%); background:rgba(40,30,20,0.9); border:2px solid var(--accent); border-radius:8px; padding:6px 12px; font-size:calc(11px * var(--ui-scale)); color:#ffe8b0; font-weight:bold; z-index:10; pointer-events:none; display:none; text-align:center; max-width:90%; }
   
-  /* ЛОГ: ОПУЩЕН НА 10px НИЖЕ */
   #log { position:absolute; bottom:calc(var(--safe-bottom) + 250px); left:0; width:100%; height:120px; background:rgba(10,12,18,0.85); border-top:2px solid var(--border); border-bottom:2px solid var(--border); padding:4px 10px; overflow-y:auto; font-size:calc(11px * var(--ui-scale)); z-index:10; pointer-events:none; color:#fff; text-shadow:1px 1px 0 #000; }
   #log::-webkit-scrollbar { display:none; }
 
@@ -44,35 +43,33 @@
   .close-btn:active { transform: scale(0.97); }
   .tbtn:active { background:rgba(232,184,96,0.25); border-color:var(--accent); color:var(--accent); }
 
-  /* ===== СЕТКА КНОПОК: ОТСТУП УВЕЛИЧЕН В 3 РАЗА ===== */
-  /* Шаг: 66px по горизонтали (56 + 10 отступ), 76px по вертикали (56 + 20 отступ) */
+  /* ===== СЕТКА КНОПОК ===== */
+  /* Шаг по X: 67px (56 + 11px зазор). Шаг по Y: 75px (56 + 19px зазор) */
   .tbtn { position:absolute; width:calc(56px * var(--ui-scale)); height:calc(56px * var(--ui-scale)); background:var(--panel); border:2px solid var(--border); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:calc(20px * var(--ui-scale)); color:#ccc; z-index:20; }
   
-  /* ЛЕВАЯ СТОРОНА (ДВИЖЕНИЕ) */
-  /* Рекорды, прыжок, влево — в один ряд */
-  #btnRecord { left:calc(var(--safe-left) + 14px); bottom:calc(var(--safe-bottom) + 14px); background:#2a3a4a; border-color:#4a5a8a; }
-  #btnJump { left:calc(var(--safe-left) + 80px); bottom:calc(var(--safe-bottom) + 14px); }
-  #btnLeft { left:calc(var(--safe-left) + 146px); bottom:calc(var(--safe-bottom) + 14px); }
-  /* Вправо — над кнопкой влево */
-  #btnRight { left:calc(var(--safe-left) + 146px); bottom:calc(var(--safe-bottom) + 90px); }
+  /* ЛЕВАЯ ПАНЕЛЬ: вертикальный столбец 🏆 / ⤒ / ◀ и ▶ справа от ◀ */
+  #btnRecord { left:calc(var(--safe-left) + 14px); bottom:calc(var(--safe-bottom) + 164px); background:#2a3a4a; border-color:#4a5a8a; }
+  #btnJump   { left:calc(var(--safe-left) + 14px); bottom:calc(var(--safe-bottom) + 89px); }
+  #btnLeft   { left:calc(var(--safe-left) + 14px); bottom:calc(var(--safe-bottom) + 14px); }
+  #btnRight  { left:calc(var(--safe-left) + 81px); bottom:calc(var(--safe-bottom) + 14px); }
 
   /* ПРАВАЯ СТОРОНА (ДЕЙСТВИЯ) */
   /* 1-й ряд (снизу) */
-  #btnPick { right:calc(var(--safe-right) + 14px); bottom:calc(var(--safe-bottom) + 14px); }
-  #btnCraft { right:calc(var(--safe-right) + 80px); bottom:calc(var(--safe-bottom) + 14px); }
-  #btnThrow { right:calc(var(--safe-right) + 146px); bottom:calc(var(--safe-bottom) + 14px); background:#3a2a1a; border-color:#8a5a2a; display:none; }
+  #btnPick   { right:calc(var(--safe-right) + 14px); bottom:calc(var(--safe-bottom) + 14px); }
+  #btnCraft  { right:calc(var(--safe-right) + 81px); bottom:calc(var(--safe-bottom) + 14px); }
+  #btnThrow  { right:calc(var(--safe-right) + 148px); bottom:calc(var(--safe-bottom) + 14px); background:#3a2a1a; border-color:#8a5a2a; display:none; }
 
   /* 2-й ряд (середина) */
-  #btnAttack { right:calc(var(--safe-right) + 14px); bottom:calc(var(--safe-bottom) + 90px); }
-  #btnInv { right:calc(var(--safe-right) + 80px); bottom:calc(var(--safe-bottom) + 90px); }
-  #btnDog { right:calc(var(--safe-right) + 146px); bottom:calc(var(--safe-bottom) + 90px); background:#3a2a1a; border-color:#c8a050; display:none; }
+  #btnAttack { right:calc(var(--safe-right) + 14px); bottom:calc(var(--safe-bottom) + 89px); }
+  #btnInv    { right:calc(var(--safe-right) + 81px); bottom:calc(var(--safe-bottom) + 89px); }
+  #btnDog    { right:calc(var(--safe-right) + 148px); bottom:calc(var(--safe-bottom) + 89px); background:#3a2a1a; border-color:#c8a050; display:none; }
   #btnDog.feed { border-color:#6c6; box-shadow:0 0 10px rgba(108,204,108,0.5); }
   #btnDog:disabled { opacity:0.4; filter:grayscale(0.7); }
 
   /* 3-й ряд (сверху) */
-  #btnSit { right:calc(var(--safe-right) + 14px); bottom:calc(var(--safe-bottom) + 166px); background:#4a3a2a; border-color:#8a6a4a; }
-  #ctxBtn { right:calc(var(--safe-right) + 80px); bottom:calc(var(--safe-bottom) + 166px); background:#2a4a2a; border-color:#4a8a4a; display:none; }
-  #ctxBtnHide { right:calc(var(--safe-right) + 146px); bottom:calc(var(--safe-bottom) + 166px); background:#2a2a4a; border-color:#4a4a8a; display:none; }
+  #btnSit    { right:calc(var(--safe-right) + 14px); bottom:calc(var(--safe-bottom) + 164px); background:#4a3a2a; border-color:#8a6a4a; }
+  #ctxBtn    { right:calc(var(--safe-right) + 81px); bottom:calc(var(--safe-bottom) + 164px); background:#2a4a2a; border-color:#4a8a4a; display:none; }
+  #ctxBtnHide{ right:calc(var(--safe-right) + 148px); bottom:calc(var(--safe-bottom) + 164px); background:#2a2a4a; border-color:#4a4a8a; display:none; }
 
   #deathScreen { position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.95); display:none; align-items:center; justify-content:center; flex-direction:column; color:#d34b4b; font-family:monospace; text-align:center; padding:20px; }
   #deathScreen h1 { font-size:40px; margin-bottom:20px; text-shadow:0 0 20px #d34b4b; }
@@ -942,11 +939,14 @@ function completeGrandmaHelp(g) {
   grandmaEventActive = false;
 }
 
+// === ИСПРАВЛЕНО: спавн бомжа в зоне видимости игрока, а не в левом верхнем углу ===
 function spawnBeggar() {
   if (beggarNpc && beggarNpc.active) return;
   const scene = game.scene.scenes[0]; if (!scene || !player) return;
   const groundY = scene.groundY;
-  const bx = player.x + (Math.random() * 800 - 400);
+  const side = Math.random() < 0.5 ? -1 : 1;
+  const dist = 120 + Math.random() * 280;
+  const bx = player.x + side * dist;
   beggarNpc = scene.physics.add.sprite(bx, groundY - 14, 'bum_sit').setDepth(15);
   beggarNpc.body.setSize(24, 28);
   beggarNpc.body.setOffset(4, 28);
