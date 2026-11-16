@@ -43,30 +43,23 @@
   .close-btn:active { transform: scale(0.97); }
   .tbtn:active { background:rgba(232,184,96,0.25); border-color:var(--accent); color:var(--accent); }
 
-  /* ===== СЕТКА КНОПОК ===== */
-  /* Шаг по X: 69px (56 + 13px зазор). Шаг по Y: 73px (56 + 17px зазор) */
   .tbtn { position:absolute; width:calc(56px * var(--ui-scale)); height:calc(56px * var(--ui-scale)); background:var(--panel); border:2px solid var(--border); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:calc(20px * var(--ui-scale)); color:#ccc; z-index:20; }
   
-  /* ЛЕВАЯ ПАНЕЛЬ: вертикальный столбец 🏆 / ⤒ / ◀, ▶ справа от ◀ */
   #btnRecord { left:calc(var(--safe-left) + 14px); bottom:calc(var(--safe-bottom) + 160px); background:#2a3a4a; border-color:#4a5a8a; }
   #btnJump   { left:calc(var(--safe-left) + 14px); bottom:calc(var(--safe-bottom) + 87px); }
   #btnLeft   { left:calc(var(--safe-left) + 14px); bottom:calc(var(--safe-bottom) + 14px); }
   #btnRight  { left:calc(var(--safe-left) + 83px); bottom:calc(var(--safe-bottom) + 14px); }
 
-  /* ПРАВАЯ СТОРОНА (ДЕЙСТВИЯ) */
-  /* 1-й ряд (снизу) */
   #btnPick   { right:calc(var(--safe-right) + 14px); bottom:calc(var(--safe-bottom) + 14px); }
   #btnCraft  { right:calc(var(--safe-right) + 83px); bottom:calc(var(--safe-bottom) + 14px); }
   #btnThrow  { right:calc(var(--safe-right) + 152px); bottom:calc(var(--safe-bottom) + 14px); background:#3a2a1a; border-color:#8a5a2a; display:none; }
 
-  /* 2-й ряд (середина) */
   #btnAttack { right:calc(var(--safe-right) + 14px); bottom:calc(var(--safe-bottom) + 87px); }
   #btnInv    { right:calc(var(--safe-right) + 83px); bottom:calc(var(--safe-bottom) + 87px); }
   #btnDog    { right:calc(var(--safe-right) + 152px); bottom:calc(var(--safe-bottom) + 87px); background:#3a2a1a; border-color:#c8a050; display:none; }
   #btnDog.feed { border-color:#6c6; box-shadow:0 0 10px rgba(108,204,108,0.5); }
   #btnDog:disabled { opacity:0.4; filter:grayscale(0.7); }
 
-  /* 3-й ряд (сверху) */
   #btnSit    { right:calc(var(--safe-right) + 14px); bottom:calc(var(--safe-bottom) + 160px); background:#4a3a2a; border-color:#8a6a4a; }
   #ctxBtn    { right:calc(var(--safe-right) + 83px); bottom:calc(var(--safe-bottom) + 160px); background:#2a4a2a; border-color:#4a8a4a; display:none; }
   #ctxBtnHide{ right:calc(var(--safe-right) + 152px); bottom:calc(var(--safe-bottom) + 160px); background:#2a2a4a; border-color:#4a4a8a; display:none; }
@@ -915,12 +908,17 @@ function feedDog() {
   showEventBanner('🐕 +30 сытости');
 }
 
+// === Бабушка: спавн рядом с игроком, не одновременно с барыгой ===
 function helpGrandma() {
   if (grandmaEventActive) return;
+  if (traderNpc && traderNpc.active) return;
   grandmaEventActive = true;
   const scene = game.scene.scenes[0]; if (!scene || !player) return;
   const groundY = scene.groundY;
-  const g = scene.physics.add.sprite(player.x + 200, groundY - 24, 'npc_f').setDepth(15);
+  const side = Math.random() < 0.5 ? -1 : 1;
+  const dist = 100 + Math.random() * 80;
+  const gx = player.x + side * dist;
+  const g = scene.physics.add.sprite(gx, groundY - 24, 'npc_f').setDepth(15);
   g.body.setSize(24, 48); g.body.setOffset(4, 8);
   g.isGrandma = true; g.isNpc = true;
   g.hp = 20; g.maxHp = 20;
@@ -939,18 +937,15 @@ function completeGrandmaHelp(g) {
   grandmaEventActive = false;
 }
 
-// === ИСПРАВЛЕНО: спавн бомжа привязан к камере + банка рядом с бомжем, оба на дороге ===
+// === Бомж: спавн рядом с игроком, не одновременно с барыгой ===
 function spawnBeggar() {
   if (beggarNpc && beggarNpc.active) return;
+  if (traderNpc && traderNpc.active) return;
   const scene = game.scene.scenes[0]; if (!scene || !player) return;
   const groundY = scene.groundY;
-  // Берём видимую область экрана (камеры), а не мировые координаты игрока
-  const camW = scene.scale.width;
-  const camLeft = scene.cameras.main.scrollX;
   const side = Math.random() < 0.5 ? -1 : 1;
-  // Смещение от центра экрана: от 20% до 40% ширины в выбранную сторону
-  const offset = camW * (0.2 + Math.random() * 0.2);
-  const bx = camLeft + camW/2 + side * offset;
+  const dist = 100 + Math.random() * 80;
+  const bx = player.x + side * dist;
   beggarNpc = scene.physics.add.sprite(bx, groundY - 14, 'bum_sit').setDepth(15);
   beggarNpc.body.setSize(24, 28);
   beggarNpc.body.setOffset(4, 28);
@@ -958,7 +953,6 @@ function spawnBeggar() {
   beggarNpc.hp = 10; beggarNpc.maxHp = 10;
   beggarNpc.setTint(0x888888);
   scene.physics.add.collider(beggarNpc, scene.groundBody);
-  // Банка ставится рядом с бомжем на дороге
   beggarNpc.begCan = scene.add.sprite(bx + 18, groundY - 6, 'can').setDepth(14);
   npcs.push(beggarNpc);
   log('🧎 Бомж сидит на земле и просит милостыню.');
@@ -1049,7 +1043,7 @@ function updateTimeOfDay(delta){
   if (worldDay !== lastEventDay) {
     lastEventDay = worldDay;
     triggerRandomEvent();
-    if (Math.random() < 0.3) helpGrandma();
+    if (Math.random() < 0.3 && (!traderNpc || !traderNpc.active)) helpGrandma();
   }
   const newPhase = getTodPhase();
   if(newPhase !== lastPhase){ lastPhase = newPhase; onPhaseChange(newPhase); }
@@ -1345,6 +1339,7 @@ function create(){
   player.setCollideWorldBounds(false);
   this.physics.add.collider(player, this.groundBody);
   this.cameras.main.startFollow(player, true, 0.1, 0.1);
+  this.cameras.main.centerOn(player.x, player.y);
   weaponSprite = this.add.sprite(player.x, player.y, 'w_bottle').setDepth(11).setVisible(false);
   weatherLayer = this.add.graphics(); weatherLayer.setDepth(10.5); weatherLayer.setScrollFactor(0);
   lastPhase = getTodPhase();
@@ -1809,7 +1804,9 @@ function update(time, delta){
   updateDogCombat(time, delta);
 
   if (!beggarNpc || !beggarNpc.active) {
-    if (Math.random() < 0.0002) spawnBeggar();
+    if (!traderNpc || !traderNpc.active) {
+      if (Math.random() < 0.0002) spawnBeggar();
+    }
   }
 
   if(businessLevel>0){
