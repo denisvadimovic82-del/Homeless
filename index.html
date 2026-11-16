@@ -26,7 +26,9 @@
   #dayText { font-size:calc(10px * var(--ui-scale)); color:#aaa; font-weight:normal; }
   #weatherText { font-size:calc(11px * var(--ui-scale)); color:#fff; }
   #questBox { position:absolute; top:calc(var(--safe-top) + 100px); left:50%; transform:translateX(-50%); background:rgba(40,30,20,0.9); border:2px solid var(--accent); border-radius:8px; padding:6px 12px; font-size:calc(11px * var(--ui-scale)); color:#ffe8b0; font-weight:bold; z-index:10; pointer-events:none; display:none; text-align:center; max-width:90%; }
-  #log { position:absolute; bottom:calc(var(--safe-bottom) + 211px); left:0; width:100%; height:100px; background:rgba(10,12,18,0.85); border-top:2px solid var(--border); border-bottom:2px solid var(--border); padding:4px 10px; overflow-y:auto; font-size:calc(11px * var(--ui-scale)); z-index:10; pointer-events:none; color:#fff; text-shadow:1px 1px 0 #000; }
+  
+  /* ЛОГ ПОДНЯТ НАД КНОПКАМИ */
+  #log { position:absolute; bottom:calc(var(--safe-bottom) + 260px); left:0; width:100%; height:120px; background:rgba(10,12,18,0.85); border-top:2px solid var(--border); border-bottom:2px solid var(--border); padding:4px 10px; overflow-y:auto; font-size:calc(11px * var(--ui-scale)); z-index:10; pointer-events:none; color:#fff; text-shadow:1px 1px 0 #000; }
   #log::-webkit-scrollbar { display:none; }
 
   .tbtn, .close-btn, .craft-tab, .recipe-btn, .shop-row button, #actionMenu button,
@@ -42,23 +44,33 @@
   .close-btn:active { transform: scale(0.97); }
   .tbtn:active { background:rgba(232,184,96,0.25); border-color:var(--accent); color:var(--accent); }
 
+  /* ===== СЕТКА КНОПОК С ОТСТУПАМИ ===== */
+  /* Шаг сетки: 58px по горизонтали (56 + 2 отступ), 60px по вертикали (56 + 4 отступ) */
   .tbtn { position:absolute; width:calc(56px * var(--ui-scale)); height:calc(56px * var(--ui-scale)); background:var(--panel); border:2px solid var(--border); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:calc(20px * var(--ui-scale)); color:#ccc; z-index:20; }
-  #btnLeft { left:calc(var(--safe-left) + 14px); bottom:calc(var(--safe-bottom) + 80px); }
-  #btnRight{ left:calc(var(--safe-left) + 14px); bottom:calc(var(--safe-bottom) + 14px); }
-  #btnJump { left:calc(var(--safe-left) + 80px); bottom:calc(var(--safe-bottom) + 47px); }
-  #btnAttack{ right:calc(var(--safe-right) + 14px); bottom:calc(var(--safe-bottom) + 80px); }
+  
+  /* ЛЕВАЯ СТОРОНА (ДВИЖЕНИЕ) */
+  #btnLeft { left:calc(var(--safe-left) + 14px); bottom:calc(var(--safe-bottom) + 14px); }
+  #btnRight{ left:calc(var(--safe-left) + 72px); bottom:calc(var(--safe-bottom) + 14px); }
+  #btnJump { left:calc(var(--safe-left) + 43px); bottom:calc(var(--safe-bottom) + 74px); }
+  #btnRecord { left:calc(var(--safe-left) + 14px); bottom:calc(var(--safe-bottom) + 134px); background:#2a3a4a; border-color:#4a5a8a; }
+
+  /* ПРАВАЯ СТОРОНА (ДЕЙСТВИЯ) */
+  /* 1-й ряд (снизу) */
   #btnPick { right:calc(var(--safe-right) + 14px); bottom:calc(var(--safe-bottom) + 14px); }
-  #btnCraft { right:calc(var(--safe-right) + 80px); bottom:calc(var(--safe-bottom) + 14px); }
-  #btnInv { right:calc(var(--safe-right) + 80px); bottom:calc(var(--safe-bottom) + 80px); }
-  #btnThrow { right:calc(var(--safe-right) + 146px); bottom:calc(var(--safe-bottom) + 47px); background:#3a2a1a; border-color:#8a5a2a; display:none; }
-  #btnSit { right:calc(var(--safe-right) + 14px); bottom:calc(var(--safe-bottom) + 146px); background:#4a3a2a; border-color:#8a6a4a; }
-  #ctxBtn { right:calc(var(--safe-right) + 80px); bottom:calc(var(--safe-bottom) + 146px); background:#2a4a2a; border-color:#4a8a4a; display:none; }
-  #ctxBtnHide { right:calc(var(--safe-right) + 146px); bottom:calc(var(--safe-bottom) + 146px); background:#2a2a4a; border-color:#4a4a8a; display:none; }
-  #btnRecord { left:calc(var(--safe-left) + 14px); bottom:calc(var(--safe-bottom) + 146px); background:#2a3a4a; border-color:#4a5a8a; }
-  /* НОВАЯ КНОПКА ДЛЯ СОБАКИ: справа, рядом с атакой/действиями */
-  #btnDog { right:calc(var(--safe-right) + 146px); bottom:calc(var(--safe-bottom) + 80px); background:#3a2a1a; border-color:#c8a050; display:none; }
+  #btnCraft { right:calc(var(--safe-right) + 72px); bottom:calc(var(--safe-bottom) + 14px); }
+  #btnThrow { right:calc(var(--safe-right) + 130px); bottom:calc(var(--safe-bottom) + 14px); background:#3a2a1a; border-color:#8a5a2a; display:none; }
+
+  /* 2-й ряд (середина) */
+  #btnAttack { right:calc(var(--safe-right) + 14px); bottom:calc(var(--safe-bottom) + 74px); }
+  #btnInv { right:calc(var(--safe-right) + 72px); bottom:calc(var(--safe-bottom) + 74px); }
+  #btnDog { right:calc(var(--safe-right) + 130px); bottom:calc(var(--safe-bottom) + 74px); background:#3a2a1a; border-color:#c8a050; display:none; }
   #btnDog.feed { border-color:#6c6; box-shadow:0 0 10px rgba(108,204,108,0.5); }
   #btnDog:disabled { opacity:0.4; filter:grayscale(0.7); }
+
+  /* 3-й ряд (сверху) */
+  #btnSit { right:calc(var(--safe-right) + 14px); bottom:calc(var(--safe-bottom) + 134px); background:#4a3a2a; border-color:#8a6a4a; }
+  #ctxBtn { right:calc(var(--safe-right) + 72px); bottom:calc(var(--safe-bottom) + 134px); background:#2a4a2a; border-color:#4a8a4a; display:none; }
+  #ctxBtnHide { right:calc(var(--safe-right) + 130px); bottom:calc(var(--safe-bottom) + 134px); background:#2a2a4a; border-color:#4a4a8a; display:none; }
 
   #deathScreen { position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.95); display:none; align-items:center; justify-content:center; flex-direction:column; color:#d34b4b; font-family:monospace; text-align:center; padding:20px; }
   #deathScreen h1 { font-size:40px; margin-bottom:20px; text-shadow:0 0 20px #d34b4b; }
@@ -167,7 +179,6 @@
 <div id="btnAttack" class="tbtn">⚔</div><div id="btnPick" class="tbtn">✋</div><div id="btnCraft" class="tbtn">🔨</div>
 <div id="btnInv" class="tbtn">🎒</div><div id="btnThrow" class="tbtn">🍾</div><div id="btnSit" class="tbtn">🪑</div>
 <div id="btnRecord" class="tbtn">🏆</div><div id="ctxBtn" class="tbtn">🔍</div><div id="ctxBtnHide" class="tbtn">🛌</div>
-<!-- НОВАЯ КНОПКА ДЛЯ СОБАКИ -->
 <div id="btnDog" class="tbtn">🐕</div>
 <div id="tooltip"><div id="ttTitle"></div><div id="ttDesc"></div><div id="ttStats"></div></div>
 <div id="actionMenu"></div>
@@ -354,7 +365,7 @@ let policeSpawnCooldown = 0;
 let beggarNpc = null;
 let grandmaEventActive = false;
 
-let player, weaponSprite, groundBody;
+let player, weaponSprite;
 let npcs=[], trashBags=[], projectiles=[], buildings=[];
 let currentCtxTarget=null, attackCooldown=0, throwCooldown=0, isHiding=false;
 let weatherLayer, weatherParticles=[], lightningAlpha=0;
@@ -365,9 +376,8 @@ const litWindows=[];
 let lastPhase='';
 let currentCraftTab='weapon';
 
-// === НОВОЕ: кулдаун кормления собаки ===
 let lastDogFeed = 0;
-const DOG_FEED_CD = 60000; // 60 секунд
+const DOG_FEED_CD = 60000;
 
 function syncInv(){
   state.inv = {};
@@ -511,7 +521,6 @@ function updateSprite(){
   else player.clearTint();
 }
 
-// === ТЮРЬМА ===
 function goToJail(){
   if (inJail) return;
   inJail = true;
@@ -608,12 +617,11 @@ document.getElementById('jailEscapeBtn').onclick = () => {
   }
 };
 
-// === ПОЛИЦИЯ ===
 function spawnPolice(){
   if (policeChase && policeChase.sprite && policeChase.sprite.active) return;
   const scene = game.scene.scenes[0];
   if (!scene || !player) return;
-  const groundY = scene.scale.height - 20;
+  const groundY = scene.groundY;
   const npc = scene.physics.add.sprite(player.x + (player.flipX?-300:300), groundY - 24, 'npc_cop');
   npc.body.setSize(24, 48); npc.body.setOffset(4, 8);
   npc.isThug = true; npc.isNpc = true; npc.isCop = true;
@@ -621,7 +629,7 @@ function spawnPolice(){
   npc.hitsLanded = 0;
   npc.lastAttack = 0;
   npc.setDepth(15);
-  scene.physics.add.collider(npc, groundBody);
+  scene.physics.add.collider(npc, scene.groundBody);
   npcs.push(npc);
   policeChase = { sprite: npc };
   log('👮 Полицейский гонится за тобой!');
@@ -723,7 +731,13 @@ function unequip(slot){
 }
 function craft(outId){ const r=RECIPES.find(x=>x.out===outId); if(!r) return; for(const [k,v] of Object.entries(r.cost)) if(invCount(k)<v){ log('Нужно: '+ITEMS[k].name); return; } for(const [k,v] of Object.entries(r.cost)) invRemove(k,v); invAdd(outId,1); log('Скрафчено: '+ITEMS[outId].name); }
 
-// === ИСПРАВЛЕНО: иконки для всех дропов ===
+function pickupTextureFor(id){
+  const map = {
+    food:'item_food', water_bottle:'item_water', rag:'item_rag_mat',
+    rozochka:'item_rozochka', bottle:'item_bottle', coin:'item_coin'
+  };
+  return map[id] || 'item_coin';
+}
 function dropFromSlot(i){
   const s = state.slots[i]; if(!s) return;
   const id = s.id;
@@ -736,15 +750,6 @@ function dropFromSlot(i){
     spr.itemId = id; spr.isPickup = true;
     scene.tweens.add({ targets: spr, y: spr.y - 8, yoyo: true, repeat: -1, duration: 1000 });
   }
-}
-
-// === ИСПРАВЛЕНО: маппинг текстур для дропа ===
-function pickupTextureFor(id){
-  const map = {
-    food:'item_food', water_bottle:'item_water', rag:'item_rag_mat',
-    rozochka:'item_rozochka', bottle:'item_bottle', coin:'item_coin'
-  };
-  return map[id] || 'item_coin';
 }
 
 function renderStash(){
@@ -884,12 +889,11 @@ function adoptDog() {
   if (petDogSprite && petDogSprite.active) petDogSprite.destroy();
   petDogSprite = scene.physics.add.sprite(player.x - 40, player.y - 20, 'npc_dog').setDepth(12);
   petDogSprite.body.setSize(40, 32); petDogSprite.body.setAllowGravity(true);
-  scene.physics.add.collider(petDogSprite, groundBody);
+  scene.physics.add.collider(petDogSprite, scene.groundBody);
   log('🐕 Собака приручена!'); showEventBanner('🐕 Собака с тобой!'); addAchievement('dog','Лучший друг');
   changeReputation(5);
 }
 
-// === ИСПРАВЛЕНО: кормление собаки по времени (кулдаун + проверка голода) ===
 function feedDog() {
   if (!state.petDog) { log('🐕 Нет собаки'); return; }
   if (invCount('food') < 1) { log('🐕 Нужна еда'); return; }
@@ -916,12 +920,12 @@ function helpGrandma() {
   if (grandmaEventActive) return;
   grandmaEventActive = true;
   const scene = game.scene.scenes[0]; if (!scene || !player) return;
-  const groundY = scene.scale.height - 20;
+  const groundY = scene.groundY;
   const g = scene.physics.add.sprite(player.x + 200, groundY - 24, 'npc_f').setDepth(15);
   g.body.setSize(24, 48); g.body.setOffset(4, 8);
   g.isGrandma = true; g.isNpc = true;
   g.hp = 20; g.maxHp = 20;
-  scene.physics.add.collider(g, groundBody);
+  scene.physics.add.collider(g, scene.groundBody);
   npcs.push(g);
   showEventBanner('👵 Бабушка уронила сумку! Помоги (нажми 🔍)');
   log('👵 Рядом бабушка. Подойди и помоги (кнопка 🔍)');
@@ -936,11 +940,10 @@ function completeGrandmaHelp(g) {
   grandmaEventActive = false;
 }
 
-// === ИСПРАВЛЕНО: бомж теперь сидит (bum_sit), рядом шапка/банка ===
 function spawnBeggar() {
   if (beggarNpc && beggarNpc.active) return;
   const scene = game.scene.scenes[0]; if (!scene || !player) return;
-  const groundY = scene.scale.height - 20;
+  const groundY = scene.groundY;
   const bx = player.x + (Math.random() * 800 - 400);
   beggarNpc = scene.physics.add.sprite(bx, groundY - 14, 'bum_sit').setDepth(15);
   beggarNpc.body.setSize(24, 28);
@@ -948,8 +951,7 @@ function spawnBeggar() {
   beggarNpc.isBeggar = true; beggarNpc.isNpc = true;
   beggarNpc.hp = 10; beggarNpc.maxHp = 10;
   beggarNpc.setTint(0x888888);
-  scene.physics.add.collider(beggarNpc, groundBody);
-  // шапка/банка для подаяния
+  scene.physics.add.collider(beggarNpc, scene.groundBody);
   beggarNpc.begCan = scene.add.sprite(bx + 18, groundY - 6, 'can').setDepth(14);
   npcs.push(beggarNpc);
   log('🧎 Бомж сидит на земле и просит милостыню.');
@@ -1037,7 +1039,6 @@ function updateTimeOfDay(delta){
   if(scene && scene.cameras && scene.cameras.main) scene.cameras.main.setBackgroundColor(skyColor);
   const isNight = (hours>=21 || hours<6);
   for (let i = litWindows.length - 1; i >= 0; i--) { const w = litWindows[i]; if (!w.active) { litWindows.splice(i,1); continue; } const target = isNight ? (w.isLit ? w.litColor : w.baseColor) : w.baseColor; if (w.fillColor !== target) w.setFillStyle(target); }
-  // ИСПРАВЛЕНО: сначала событие дня, потом бабушка (без затирания флага)
   if (worldDay !== lastEventDay) {
     lastEventDay = worldDay;
     triggerRandomEvent();
@@ -1118,22 +1119,19 @@ function giveAlms() {
   changeReputation(3);
   log('🧎 Дал милостыню бомжу (+3 репутации)');
   showEventBanner('🧎 +3 репутации');
-  // ИСПРАВЛЕНО: чистим и банку, и спрайт
   if (beggarNpc) {
     if (beggarNpc.begCan) beggarNpc.begCan.destroy();
     beggarNpc.destroy();
     beggarNpc = null;
   }
 }
-function sitDown(){ if(isSitting) return; isSitting=true; btnSit.style.display='none'; player.anims.stop(); player.setTexture('bum_sit'); player.body.setVelocityX(0); const groundY = game.scene.scenes[0].scale.height - 20; player.y = groundY - 24; sittingCan = game.scene.scenes[0].add.sprite(player.x+20, groundY-8, 'can').setDepth(5); log('Сел просить...'); document.getElementById('btnAttack').style.display='none'; }
+function sitDown(){ if(isSitting) return; isSitting=true; btnSit.style.display='none'; player.anims.stop(); player.setTexture('bum_sit'); player.body.setVelocityX(0); const groundY = game.scene.scenes[0].groundY; player.y = groundY - 24; sittingCan = game.scene.scenes[0].add.sprite(player.x+20, groundY-8, 'can').setDepth(5); log('Сел просить...'); document.getElementById('btnAttack').style.display='none'; }
 function standUp(){ if(!isSitting) return; isSitting=false; player.setTexture('bum_idle'); if(sittingCan){ sittingCan.destroy(); sittingCan=null; } document.getElementById('btnAttack').style.display='flex'; log('Встал.'); }
 btnSit.onclick = ()=>{ if(isSitting) standUp(); else sitDown(); };
 
-// === НОВОЕ: кнопка собаки (отдельная) ===
 btnDog.onclick = () => {
   if (!player) return;
   if (!state.petDog) {
-    // приручение — если рядом бездомная
     const near = npcs.find(n => n.active && n.isAnimal && n.texture.key === 'npc_dog' &&
       Phaser.Math.Distance.Between(player.x, player.y, n.x, n.y) < 100);
     if (near) { adoptDog(); return; }
@@ -1171,7 +1169,6 @@ function updateCtxUI(){
   buildings.forEach(b=>{ if(!b.active) return; let d=Phaser.Math.Distance.Between(player.x,player.y,b.x,b.y); if(d<minDist){ minDist=d; closest={obj:b,isBuilding:true}; } });
   if (traderNpc && traderNpc.active) { let d = Phaser.Math.Distance.Between(player.x, player.y, traderNpc.x, traderNpc.y); if (d < minDist) { minDist = d; closest = { obj: traderNpc, isTrader: true }; } }
   if (beggarNpc && beggarNpc.active) { let d = Phaser.Math.Distance.Between(player.x, player.y, beggarNpc.x, beggarNpc.y); if (d < minDist) { minDist = d; closest = { obj: beggarNpc, isBeggar: true }; } }
-  // УБРАНО: ветки _isDog/_isDogFeed из общей кнопки — теперь за это отвечает btnDog
   npcs.forEach(npc => {
     if (!npc.active) return;
     if (npc.isGrandma) {
@@ -1204,7 +1201,6 @@ function updateCtxUI(){
       else { ctxBtnHide.style.display='none'; }
     } else { ctxBtn.style.display='none'; ctxBtnHide.style.display='none'; }
   }
-  // обновляем кнопку собаки
   updateDogButton();
 }
 
@@ -1230,23 +1226,24 @@ function checkWarnings() {
   if (!isWinter || state.equip.body) lastWarnCold = false;
 }
 function spawnTrader() {
-  if (!groundBody) return;
+  if (!player) return;
+  const scene = game.scene.scenes[0]; if(!scene) return;
   if (traderNpc && traderNpc.active) { if (Math.abs(Math.floor(traderNpc.x / CHUNK_W) - Math.floor(player.x / CHUNK_W)) > 4) { traderNpc.destroy(); traderNpc = null; } else { return; } }
-  const scene = game.scene.scenes[0]; const groundY = scene.scale.height - 20;
+  const groundY = scene.groundY;
   let attempts = 0;
   do { traderX = player.x + (Math.random()*800 - 400); attempts++; } while (attempts < 10 && (buildings.some(b => b.active && Math.abs(b.x - traderX) < 60) || trashBags.some(t => t.active && Math.abs(t.x - traderX) < 40)));
   traderNpc = scene.physics.add.sprite(traderX, groundY - 24, 'npc_trader').setDepth(15);
   traderNpc.body.setSize(24, 48); traderNpc.body.setOffset(4, 8);
   traderNpc.isTrader = true; traderNpc.dir = -1; traderNpc.isFemale = false; traderNpc.hp = 100; traderNpc.maxHp = 100; traderNpc.isThug = false; traderNpc.isNpc = true;
-  scene.physics.add.collider(traderNpc, groundBody); log('🧔 Появился барыга!');
+  scene.physics.add.collider(traderNpc, scene.groundBody); log('🧔 Появился барыга!');
 }
 function checkPolice() { if (currentKills >= 10 && !state.achievements.includes('wanted')) { addAchievement('wanted','В розыске'); log('🚔 ПОЛИЦИЯ ИЩЕТ ТЕБЯ!'); showEventBanner('🚔 Полиция в розыске!'); state.hp = Math.max(1, state.hp - 30); const fine = Math.min(invCount('coin'), 100); if (fine > 0) { invRemove('coin', fine); log(`💸 Штраф: -${fine} 🪙`); } } }
 function applySeasonEffects() { const monthIndex = Math.floor(((worldDay - 1) % 365) / 30); if (monthIndex >= 11 || monthIndex <= 1) { if (!state.equip.body) { state.hp = Math.max(0, state.hp - 0.002); } } }
 function checkAchievements() { if (worldDay >= 30) addAchievement('survive30','Прожил 30 дней'); if (invCount('coin') >= 1000) addAchievement('rich','Богач'); if (records.kills >= 100) addAchievement('killer','Убийца 100 гопников'); if (businessLevel >= 5) addAchievement('biz5','Бизнесмен'); if (state.equip.weapon === 'katana') addAchievement('katana','Обладатель катаны'); }
 function checkWin() { if (invCount('coin') >= 10000 && !state.achievements.includes('win')) { addAchievement('win','Купил квартиру!'); showEventBanner('🏆 ПОБЕДА! Ты купил квартиру!'); log('🏆 ФИНАЛ: Ты купил квартиру!'); } }
 
-const config = { type:Phaser.CANVAS, parent:'game', width:W0, height:H0, backgroundColor:'#5dade2', pixelArt:true,
-  scale:{ mode:Phaser.Scale.FIT, autoCenter:Phaser.Scale.CENTER_BOTH, width:W0, height:H0 },
+const config = { type:Phaser.CANVAS, parent:'game', backgroundColor:'#5dade2', pixelArt:true,
+  scale:{ mode:Phaser.Scale.RESIZE, autoCenter:Phaser.Scale.CENTER_BOTH },
   physics:{ default:'arcade', arcade:{ gravity:{y:1200}, debug:false } }, 
   input: { touch: false }, 
   scene:{ preload, create, update } };
@@ -1312,26 +1309,39 @@ function isPositionFree(x, minDist) {
 }
 
 function create(){
-  const W=this.scale.width, H=this.scale.height;
+  const H = this.scale.height;
   this.cameras.main.setBackgroundColor(0x5dade2);
-  const groundY = H - 20;
-  groundBody = this.add.rectangle(-500000, groundY, 1000000, 40, 0x2a3a2a).setOrigin(0,0).setDepth(1);
-  this.physics.add.existing(groundBody, true);
-  groundBody.body.setSize(1000000, 40); groundBody.body.updateFromGameObject();
-  this.add.rectangle(-500000, H-10, 1000000, 20, 0x555555).setOrigin(0,0).setDepth(2);
+  
+  this.groundY = H - 60;
+  this.groundBody = this.add.rectangle(-500000, this.groundY, 1000000, 40, 0x2a3a2a).setOrigin(0,0).setDepth(1);
+  this.physics.add.existing(this.groundBody, true);
+  this.groundBody.body.setSize(1000000, 40); this.groundBody.body.updateFromGameObject();
+  this.road = this.add.rectangle(-500000, this.groundY + 20, 1000000, 40, 0x555555).setOrigin(0,0).setDepth(2);
+  this.sidewalk = this.add.rectangle(-500000, this.groundY - 10, 1000000, 10, 0x888888).setOrigin(0,0).setDepth(2);
+
+  this.scale.on('resize', (gameSize) => {
+    this.groundY = gameSize.height - 60;
+    this.groundBody.y = this.groundY;
+    this.groundBody.body.updateFromGameObject();
+    this.road.y = this.groundY + 20;
+    this.sidewalk.y = this.groundY - 10;
+    if (player && player.body) player.y = this.groundY - 48;
+  });
+
   this.anims.create({ key:'bum_walk_anim', frames:[{key:'bum_walk1'},{key:'bum_walk2'}], frameRate:8, repeat:-1 });
   this.anims.create({ key:'civ_m_walk', frames:[{key:'npc_m1'},{key:'npc_m2'}], frameRate:6, repeat:-1 });
   this.anims.create({ key:'civ_f_walk', frames:[{key:'npc_f1'},{key:'npc_f2'}], frameRate:6, repeat:-1 });
   this.anims.create({ key:'trader_walk', frames:[{key:'npc_trader1'},{key:'npc_trader2'}], frameRate:6, repeat:-1 });
-  player = this.physics.add.sprite(0, groundY - 48, 'bum_idle').setDepth(10);
+  
+  player = this.physics.add.sprite(0, this.groundY - 48, 'bum_idle').setDepth(10);
   player.body.setSize(24, 48); player.body.setOffset(4, 8);
   player.setCollideWorldBounds(false);
-  this.physics.add.collider(player, groundBody);
+  this.physics.add.collider(player, this.groundBody);
   this.cameras.main.startFollow(player, true, 0.1, 0.1);
   weaponSprite = this.add.sprite(player.x, player.y, 'w_bottle').setDepth(11).setVisible(false);
   weatherLayer = this.add.graphics(); weatherLayer.setDepth(10.5); weatherLayer.setScrollFactor(0);
   lastPhase = getTodPhase();
-  const NPC_Y = groundY - 24;
+  const NPC_Y = this.groundY - 24;
   for (let i = 0; i < 6; i++) {
     const isFemale = i % 2 === 0;
     const tex = isFemale ? 'npc_f' : 'npc_m';
@@ -1339,7 +1349,7 @@ function create(){
     npc.body.setSize(24, 48); npc.body.setOffset(4, 8);
     npc.isThug = false; npc.isNpc = true; npc.hp = 20; npc.maxHp = 20;
     npc.didDrop = false; npc.dir = i%3===0?1:-1; npc.isFemale = isFemale;
-    npc.setDepth(15); this.physics.add.collider(npc, groundBody); npcs.push(npc);
+    npc.setDepth(15); this.physics.add.collider(npc, this.groundBody); npcs.push(npc);
   }
   log('Старт. NPC: ' + npcs.length);
   if (window.__savedX !== undefined && window.__savedX !== 0) {
@@ -1353,7 +1363,7 @@ function create(){
     if (!petDogSprite || !petDogSprite.active) {
       petDogSprite = this.physics.add.sprite(player.x - 40, player.y - 20, 'npc_dog').setDepth(12);
       petDogSprite.body.setSize(40, 32); petDogSprite.body.setAllowGravity(true);
-      this.physics.add.collider(petDogSprite, groundBody);
+      this.physics.add.collider(petDogSprite, this.groundBody);
     }
   }
   if (state.equip.weapon) updateSprite();
@@ -1364,8 +1374,7 @@ function generateChunk(idx){
   if(loadedChunks.has(idx)) return;
   const scene = game.scene.scenes[0];
   const startX = idx * CHUNK_W;
-  const H = scene.scale.height;
-  const groundY = H - 20;
+  const groundY = scene.groundY;
   const NPC_Y = groundY - 24;
   const objs = [];
   for(let i=0; i<2; i++){
@@ -1443,10 +1452,10 @@ function generateChunk(idx){
         npc.body.setSize(24, 48); npc.body.setOffset(4, 8);
         npc.isThug = false; npc.isNpc = true; npc.hp = 20; npc.maxHp = 20;
         npc.didDrop = false; npc.dir = Math.random() > 0.5 ? 1 : -1; npc.isFemale = isFemale;
-        npc.setDepth(15); scene.physics.add.collider(npc, groundBody); npcs.push(npc);
+        npc.setDepth(15); scene.physics.add.collider(npc, scene.groundBody); npcs.push(npc);
       }
-      if (Math.random() < 0.3) { const dog = scene.physics.add.sprite(startX + 50 + Math.random()*(CHUNK_W-100), NPC_Y - 10, 'npc_dog'); dog.body.setSize(40, 32); dog.isNpc = true; dog.isThug = false; dog.isAnimal = true; dog.hp = 15; dog.maxHp = 15; dog.dir = Math.random() > 0.5 ? 1 : -1; dog.setDepth(15); scene.physics.add.collider(dog, groundBody); npcs.push(dog); }
-      if (Math.random() < 0.5) { const rat = scene.physics.add.sprite(startX + 50 + Math.random()*(CHUNK_W-100), NPC_Y + 10, 'npc_rat'); rat.body.setSize(24, 16); rat.isNpc = true; rat.isThug = false; rat.isAnimal = true; rat.hp = 5; rat.maxHp = 5; rat.dir = Math.random() > 0.5 ? 1 : -1; rat.setDepth(15); scene.physics.add.collider(rat, groundBody); npcs.push(rat); }
+      if (Math.random() < 0.3) { const dog = scene.physics.add.sprite(startX + 50 + Math.random()*(CHUNK_W-100), NPC_Y - 10, 'npc_dog'); dog.body.setSize(40, 32); dog.isNpc = true; dog.isThug = false; dog.isAnimal = true; dog.hp = 15; dog.maxHp = 15; dog.dir = Math.random() > 0.5 ? 1 : -1; dog.setDepth(15); scene.physics.add.collider(dog, scene.groundBody); npcs.push(dog); }
+      if (Math.random() < 0.5) { const rat = scene.physics.add.sprite(startX + 50 + Math.random()*(CHUNK_W-100), NPC_Y + 10, 'npc_rat'); rat.body.setSize(24, 16); rat.isNpc = true; rat.isThug = false; rat.isAnimal = true; rat.hp = 5; rat.maxHp = 5; rat.dir = Math.random() > 0.5 ? 1 : -1; rat.setDepth(15); scene.physics.add.collider(rat, scene.groundBody); npcs.push(rat); }
     } else {
       if (Math.random() < 0.5) {
         const count = 1 + Math.floor(Math.random()*2);
@@ -1457,7 +1466,7 @@ function generateChunk(idx){
           npc.body.setSize(24, 48); npc.body.setOffset(4, 8);
           npc.isThug = true; npc.isNpc = true; npc.isBoss = false; npc.isFemale = isFemale;
           npc.hp = 30; npc.maxHp = 30; npc.dir = Math.random() > 0.5 ? 1 : -1;
-          npc.setDepth(15); scene.physics.add.collider(npc, groundBody); npcs.push(npc);
+          npc.setDepth(15); scene.physics.add.collider(npc, scene.groundBody); npcs.push(npc);
         }
       }
       if (Math.random() < 0.05) {
@@ -1466,7 +1475,7 @@ function generateChunk(idx){
         npc.body.setSize(48, 72); npc.body.setOffset(0, 0);
         npc.isThug = true; npc.isNpc = true; npc.isBoss = true; npc.isFemale = false;
         npc.hp = 150; npc.maxHp = 150; npc.setDepth(15);
-        scene.physics.add.collider(npc, groundBody); npcs.push(npc);
+        scene.physics.add.collider(npc, scene.groundBody); npcs.push(npc);
         log('⚠️ Появился БОСС!');
       }
     }
@@ -1482,12 +1491,10 @@ function unloadChunk(idx){
   buildings = buildings.filter(b=>b.active);
   loadedChunks.delete(idx); npcChunks.delete(idx);
   if (traderNpc && traderNpc.active && Math.floor(traderNpc.x / CHUNK_W) === idx) { traderNpc.destroy(); traderNpc = null; }
-  // ИСПРАВЛЕНО: не удаляем собаку-питомца при выгрузке чанка; перемещаем к игроку
   if (petDogSprite && petDogSprite.active && Math.floor(petDogSprite.x / CHUNK_W) === idx) {
     petDogSprite.x = player.x - 40;
     petDogSprite.y = player.y - 20;
   }
-  // ИСПРАВЛЕНО: чистим банку бомжа при выгрузке
   if (beggarNpc && beggarNpc.active && Math.floor(beggarNpc.x / CHUNK_W) === idx) {
     if (beggarNpc.begCan) beggarNpc.begCan.destroy();
     beggarNpc.destroy();
@@ -1531,7 +1538,6 @@ function renderAchievements(){
   }
 }
 
-// ИСПРАВЛЕНО: защита от утечки слушателей
 let _actionMenuCloser = null;
 function openItemActionMenu(x, y, slotIndex, itemId){
   const menu = document.getElementById('actionMenu');
@@ -1801,7 +1807,6 @@ function update(time, delta){
 
   if(businessLevel>0){
     businessTimer += delta;
-    // ИСПРАВЛЕНО: используем invAdd, а не прямое изменение state.inv
     if(businessTimer>=5000){ businessTimer=0; invAdd('coin', businessLevel); log(`Бизнес принес ${businessLevel} 🪙`); }
   }
   state.hunger = Math.max(0, state.hunger - delta*0.00005);
@@ -1866,7 +1871,6 @@ function update(time, delta){
     if(hit){ p.destroy(); return false; }
     return true;
   });
-  // УБРАНО: дублирующий checkPolice() каждые несколько кадров
   updateCtxUI();
   const pcx = Math.floor(player.x / CHUNK_W);
   for(let i = pcx-2; i<=pcx+2; i++) generateChunk(i);
