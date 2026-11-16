@@ -7,12 +7,12 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#111">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
-<title>БОМЖ: ONLINE</title>
+<title>БОМЖ</title>
 <style>
   :root { --bg:#0a0a0f; --panel:rgba(15,18,25,0.95); --border:#4a5a7a; --accent:#e8b860; --text:#d0d5e0; --text-dim:#7a859a; --slot-bg:#1a1e28; --slot-border:#3a4a5a; --ui-scale:1;
     --safe-top:env(safe-area-inset-top,0px); --safe-bottom:env(safe-area-inset-bottom,0px); --safe-left:env(safe-area-inset-left,0px); --safe-right:env(safe-area-inset-right,0px); }
   * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-  html, body { margin:0; padding:0; width:100%; height:100%; background:var(--bg); color:var(--text); font-family:'Segoe UI',Tahoma,sans-serif; overflow:hidden; touch-action:none; user-select:none; }
+  html, body { margin:0; padding:0; width:100%; height:100%; background:var(--bg); color:var(--text); font-family:'Segoe UI',Tahoma,sans-serif; overflow:hidden; user-select:none; }
   #game { position:absolute; inset:0; z-index:1; }
   #game canvas { display:block; width:100%!important; height:100%!important; }
   #hud { position:absolute; top:calc(var(--safe-top) + 10px); left:calc(var(--safe-left) + 10px); display:flex; flex-direction:column; z-index:10; pointer-events:none; }
@@ -25,45 +25,83 @@
   #clock { position:absolute; top:calc(var(--safe-top) + 10px); right:calc(var(--safe-right) + 10px); background:var(--panel); border:2px solid var(--border); border-radius:20px; padding:6px 12px; font-size:calc(12px * var(--ui-scale)); font-weight:bold; color:var(--accent); z-index:10; pointer-events:none; text-align:center; display:flex; flex-direction:column; gap:2px; line-height:1.2; }
   #dayText { font-size:calc(10px * var(--ui-scale)); color:#aaa; font-weight:normal; }
   #weatherText { font-size:calc(11px * var(--ui-scale)); color:#fff; }
-  #mpBadge { position:absolute; top:calc(var(--safe-top) + 90px); right:calc(var(--safe-right) + 10px); background:rgba(40,80,40,0.9); border:2px solid #4a8a4a; border-radius:12px; padding:4px 10px; font-size:calc(10px * var(--ui-scale)); color:#c8ffc8; z-index:10; pointer-events:none; }
-  #log { position:absolute; bottom:calc(var(--safe-bottom) + 146px); left:0; width:100%; height:50px; background:rgba(10,12,18,0.85); border-top:2px solid var(--border); border-bottom:2px solid var(--border); padding:4px 10px; overflow-y:auto; font-size:calc(11px * var(--ui-scale)); z-index:10; pointer-events:none; color:#fff; text-shadow:1px 1px 0 #000; }
+  #questBox { position:absolute; top:calc(var(--safe-top) + 100px); left:50%; transform:translateX(-50%); background:rgba(40,30,20,0.9); border:2px solid var(--accent); border-radius:8px; padding:6px 12px; font-size:calc(11px * var(--ui-scale)); color:#ffe8b0; font-weight:bold; z-index:10; pointer-events:none; display:none; text-align:center; max-width:90%; }
+  #log { position:absolute; bottom:calc(var(--safe-bottom) + 211px); left:0; width:100%; height:100px; background:rgba(10,12,18,0.85); border-top:2px solid var(--border); border-bottom:2px solid var(--border); padding:4px 10px; overflow-y:auto; font-size:calc(11px * var(--ui-scale)); z-index:10; pointer-events:none; color:#fff; text-shadow:1px 1px 0 #000; }
   #log::-webkit-scrollbar { display:none; }
-  .tbtn { position:absolute; width:calc(56px * var(--ui-scale)); height:calc(56px * var(--ui-scale)); background:var(--panel); border:2px solid var(--border); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:calc(20px * var(--ui-scale)); color:#ccc; z-index:20; transition:transform 0.1s; }
-  .tbtn:active { background:rgba(232,184,96,0.2); border-color:var(--accent); color:var(--accent); transform:scale(0.9); }
+
+  .tbtn, .close-btn, .craft-tab, .recipe-btn, .shop-row button, #actionMenu button,
+  #jailOverlay button, .modal-box button, #deathScreen button {
+    transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.12s, border-color 0.12s;
+  }
+  .tbtn:active, .close-btn:active, .craft-tab:active, .recipe-btn:active,
+  .shop-row button:active, #actionMenu button:active, #jailOverlay button:active,
+  .modal-box button:active, #deathScreen button:active {
+    transform: scale(0.93);
+    box-shadow: inset 0 2px 8px rgba(0,0,0,0.4);
+  }
+  .close-btn:active { transform: scale(0.97); }
+  .tbtn:active { background:rgba(232,184,96,0.25); border-color:var(--accent); color:var(--accent); }
+
+  .tbtn { position:absolute; width:calc(56px * var(--ui-scale)); height:calc(56px * var(--ui-scale)); background:var(--panel); border:2px solid var(--border); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:calc(20px * var(--ui-scale)); color:#ccc; z-index:20; }
   #btnLeft { left:calc(var(--safe-left) + 14px); bottom:calc(var(--safe-bottom) + 80px); }
   #btnRight{ left:calc(var(--safe-left) + 14px); bottom:calc(var(--safe-bottom) + 14px); }
   #btnJump { left:calc(var(--safe-left) + 80px); bottom:calc(var(--safe-bottom) + 47px); }
   #btnAttack{ right:calc(var(--safe-right) + 14px); bottom:calc(var(--safe-bottom) + 80px); }
-  #btnPick  { right:calc(var(--safe-right) + 14px); bottom:calc(var(--safe-bottom) + 14px); }
+  #btnPick { right:calc(var(--safe-right) + 14px); bottom:calc(var(--safe-bottom) + 14px); }
   #btnCraft { right:calc(var(--safe-right) + 80px); bottom:calc(var(--safe-bottom) + 14px); }
-  #btnInv   { right:calc(var(--safe-right) + 80px); bottom:calc(var(--safe-bottom) + 80px); }
+  #btnInv { right:calc(var(--safe-right) + 80px); bottom:calc(var(--safe-bottom) + 80px); }
   #btnThrow { right:calc(var(--safe-right) + 146px); bottom:calc(var(--safe-bottom) + 47px); background:#3a2a1a; border-color:#8a5a2a; display:none; }
-  #btnSit   { right:calc(var(--safe-right) + 14px); bottom:calc(var(--safe-bottom) + 146px); background:#4a3a2a; border-color:#8a6a4a; }
-  #ctxBtn   { right:calc(var(--safe-right) + 80px); bottom:calc(var(--safe-bottom) + 146px); background:#2a4a2a; border-color:#4a8a4a; display:none; }
+  #btnSit { right:calc(var(--safe-right) + 14px); bottom:calc(var(--safe-bottom) + 146px); background:#4a3a2a; border-color:#8a6a4a; }
+  #ctxBtn { right:calc(var(--safe-right) + 80px); bottom:calc(var(--safe-bottom) + 146px); background:#2a4a2a; border-color:#4a8a4a; display:none; }
   #ctxBtnHide { right:calc(var(--safe-right) + 146px); bottom:calc(var(--safe-bottom) + 146px); background:#2a2a4a; border-color:#4a4a8a; display:none; }
   #btnRecord { left:calc(var(--safe-left) + 14px); bottom:calc(var(--safe-bottom) + 146px); background:#2a3a4a; border-color:#4a5a8a; }
-  #deathScreen { position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.95); display:none; align-items:center; justify-content:center; flex-direction:column; color:#d34b4b; font-family:monospace; }
-  #deathScreen h1 { font-size:40px; margin-bottom:20px; }
-  #deathScreen button { background:#333; color:#fff; border:2px solid #666; padding:15px 30px; font-size:18px; border-radius:8px; cursor:pointer; font-weight:bold; }
-  #hideOverlay { position:fixed; inset:0; background:#000; z-index:9999; display:none; flex-direction:column; align-items:center; justify-content:center; color:#fff; font-family:monospace; font-size:20px; }
+  /* НОВАЯ КНОПКА ДЛЯ СОБАКИ: справа, рядом с атакой/действиями */
+  #btnDog { right:calc(var(--safe-right) + 146px); bottom:calc(var(--safe-bottom) + 80px); background:#3a2a1a; border-color:#c8a050; display:none; }
+  #btnDog.feed { border-color:#6c6; box-shadow:0 0 10px rgba(108,204,108,0.5); }
+  #btnDog:disabled { opacity:0.4; filter:grayscale(0.7); }
+
+  #deathScreen { position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.95); display:none; align-items:center; justify-content:center; flex-direction:column; color:#d34b4b; font-family:monospace; text-align:center; padding:20px; }
+  #deathScreen h1 { font-size:40px; margin-bottom:20px; text-shadow:0 0 20px #d34b4b; }
+  #deathScreen button { background:#333; color:#fff; border:2px solid #666; padding:15px 30px; font-size:18px; border-radius:8px; cursor:pointer; font-weight:bold; margin-top:20px; }
+  #hideOverlay { position:fixed; inset:0; background:#000; z-index:9999; display:none; flex-direction:column; align-items:center; justify-content:center; color:#fff; font-family:monospace; font-size:20px; text-align:center; padding:20px; }
+
+  #jailOverlay { position:fixed; inset:0; background:#1a1a1a; z-index:9998; display:none; flex-direction:column; align-items:center; justify-content:center; color:#d0d5e0; font-family:monospace; text-align:center; padding:20px; }
+  #jailOverlay h1 { font-size:40px; color:#4a5a7a; margin-bottom:10px; }
+  #jailOverlay .jail-time { font-size:30px; color:#e8b860; margin-bottom:10px; font-weight:bold; }
+  #jailOverlay .jail-sub { color:#7a859a; font-size:14px; margin-bottom:20px; max-width:400px; }
+  #jailOverlay button { background:#3a1a1a; color:#fff; border:2px solid #6a2a2a; padding:12px 24px; font-size:15px; border-radius:8px; cursor:pointer; font-weight:bold; margin:6px; }
+  #jailOverlay button.buy { background:#1a3a1a; border-color:#2a6a2a; }
+  #jailOverlay button:disabled { opacity:0.4; cursor:not-allowed; filter:grayscale(1); }
+
   .modal { position:fixed; inset:0; z-index:10000; background:rgba(0,0,0,0.85); display:none; align-items:center; justify-content:center; }
   .modal.open { display:flex; }
   .modal-box { background:var(--panel); border:2px solid var(--border); border-radius:10px; width:95%; max-width:420px; padding:16px; display:flex; flex-direction:column; max-height:85vh; overflow:hidden; }
-  .modal-box h3 { margin:0 0 12px; color:var(--accent); text-align:center; font-size:18px; text-transform:uppercase; }
-  .inv-layout { display:flex; gap:12px; height:100%; max-height:60vh; overflow:hidden; }
-  .eq-pane { display:grid; grid-template-columns:1fr; gap:8px; background:#0d1015; padding:10px; border-radius:8px; border:1px solid var(--slot-border); width:64px; align-content:start; flex-shrink:0; }
-  .eq-slot { width:44px; height:44px; background:var(--slot-bg); border:2px solid var(--slot-border); border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:20px; cursor:pointer; user-select:none; position:relative; }
-  .eq-slot.active { border-color:var(--accent); box-shadow:inset 0 0 10px rgba(232,184,96,0.4); }
-  .eq-slot .ghost { opacity:0.2; font-size:22px; position:absolute; pointer-events:none; }
-  .eq-slot .real { position:relative; z-index:1; }
-  .inv-pane { flex:1; display:flex; flex-direction:column; overflow:hidden; }
-  #invGrid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; overflow-y:auto; padding-right:4px; align-content:start; max-height:60vh; }
-  .slot { width:100%; aspect-ratio:1; background:var(--slot-bg); border:1px solid var(--slot-border); border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:24px; cursor:pointer; position:relative; user-select:none; flex-shrink:0; }
-  .slot .count { position:absolute; bottom:2px; right:4px; font-size:12px; color:#fff; font-weight:bold; text-shadow:1px 1px 0 #000; }
+  .modal-box h3 { margin:0 0 12px; color:var(--accent); text-align:center; font-size:18px; text-transform:uppercase; flex-shrink:0; }
+  #invPanel, #stashPanel { align-items: center; justify-content: center; padding: 10px; }
+  .modal-box.inv-box { width: 100%; max-width: 380px; height: auto; max-height: 90vh; border-radius: 16px; border: 2px solid var(--border); background: #12151e; box-shadow: 0 10px 40px rgba(0,0,0,0.8); padding: 16px; display: flex; flex-direction: column; }
+  .inv-layout { display: flex; gap: 10px; min-height: 0; margin-bottom: 12px; }
+  .eq-pane { display: flex; flex-direction: column; gap: 6px; background: #0a0c10; padding: 6px; border-radius: 10px; border: 1px solid var(--slot-border); width: 58px; flex-shrink: 0; overflow-y: auto; align-items: center; }
+  .eq-slot { width: 44px; height: 44px; background: var(--slot-bg); border: 2px solid var(--slot-border); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; position: relative; flex-shrink: 0; transition: border-color 0.2s, box-shadow 0.2s, transform 0.08s; }
+  .eq-slot:active { transform: scale(0.9); }
+  .eq-slot.active { border-color: var(--accent); box-shadow: inset 0 0 12px rgba(232,184,96,0.3); background: linear-gradient(145deg, #1a1e28, #2a2e38); }
+  .eq-slot .ghost { opacity: 0.15; position: absolute; pointer-events: none; }
+  .eq-slot .real { position: relative; z-index: 1; text-shadow: 0 2px 4px #000; }
+
+  .grid-wrapper { flex: 1; min-width: 0; height: 306px; max-height: 306px; background: #0a0c10; border-radius: 10px; border: 1px solid var(--slot-border); padding: 6px; overflow-y: scroll; overflow-x: hidden; -webkit-overflow-scrolling: touch; scrollbar-width: thin; scrollbar-color: var(--border) transparent; touch-action: pan-y; overscroll-behavior: contain; }
+  .grid-wrapper * { touch-action: pan-y; }
+  .grid-wrapper::-webkit-scrollbar { width: 6px; }
+  .grid-wrapper::-webkit-scrollbar-track { background: transparent; }
+  .grid-wrapper::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  #invGrid, #stashGrid { display: grid; grid-template-columns: repeat(4, 54px); grid-auto-rows: 54px; gap: 6px; width: max-content; margin: 0 auto; }
+  .slot { width: 54px; height: 54px; background: var(--slot-bg); border: 1px solid var(--slot-border); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 26px; cursor: pointer; position: relative; user-select: none; transition: transform 0.08s, border-color 0.2s; }
+  .slot:active { transform: scale(0.92); }
+  .slot.empty { opacity: 0.3; background: #111; border-style: dashed; }
+  .slot .count { position: absolute; bottom: 2px; right: 4px; font-size: 12px; color: #fff; font-weight: bold; text-shadow: 1px 1px 2px #000, -1px -1px 2px #000, 1px -1px 2px #000, -1px 1px 2px #000; }
   .slot.weapon-type { border-color:#5588cc; background:linear-gradient(145deg,#1a1e28,#1a2233); }
   .slot.armor-type { border-color:#cc8855; background:linear-gradient(145deg,#1a1e28,#2a1e18); }
   .slot.mat-type { border-color:#558855; background:linear-gradient(145deg,#1a1e28,#182418); }
-  .slot.unique-type { border-color:#c060c0; background:linear-gradient(145deg,#1a1e28,#301830); box-shadow:inset 0 0 8px #602060; }
+  .slot.unique-type { border-color:#c060c0; background:linear-gradient(145deg,#1a1e28,#301830); box-shadow:inset 0 0 12px #602060; }
+
   .craft-tabs { display:flex; gap:4px; margin-bottom:12px; overflow-x:auto; }
   .craft-tab { background:#1a1e28; border:1px solid var(--slot-border); border-radius:4px; padding:6px 12px; color:var(--text-dim); font-size:12px; font-weight:bold; cursor:pointer; }
   .craft-tab.active { background:#2a3a5a; color:var(--accent); border-color:var(--accent); }
@@ -77,7 +115,13 @@
   .shop-row button:disabled { opacity:0.4; }
   .record-row { display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #333; font-size:14px; }
   .record-val { color:var(--accent); font-weight:bold; }
-  .close-btn { margin-top:12px; background:#3a1a1a; border:2px solid #6a2a2a; color:#fff; width:100%; padding:12px; border-radius:6px; font-size:14px; font-weight:bold; cursor:pointer; }
+  .close-btn { margin-top:12px; background:#3a1a1a; border:2px solid #6a2a2a; color:#fff; width:100%; padding:12px; border-radius:6px; font-size:14px; font-weight:bold; cursor:pointer; flex-shrink: 0; }
+
+  #actionMenu { position:fixed; z-index:12000; display:none; background:rgba(15,18,25,0.98); border:2px solid var(--accent); border-radius:8px; padding:6px; flex-direction:column; gap:4px; box-shadow:0 10px 30px rgba(0,0,0,0.9); }
+  #actionMenu button { background:#2a2a4a; border:1px solid #4a4a8a; color:#fff; padding:8px 16px; border-radius:4px; font-size:13px; font-weight:bold; cursor:pointer; min-width:140px; }
+  #actionMenu button:hover { background:#3a3a6a; }
+  #actionMenu button.danger { background:#4a1a1a; border-color:#8a2a2a; }
+
   #tooltip { position:fixed; z-index:11000; display:none; background:rgba(10,12,18,0.98); border:2px solid #4a5a7a; border-radius:8px; padding:10px; max-width:220px; min-width:160px; box-shadow:0 10px 30px rgba(0,0,0,0.9); font-family:monospace; color:#d0d5e0; font-size:12px; pointer-events:none; transform:translate(-50%,-100%); margin-top:-10px; }
   #ttTitle { font-size:13px; font-weight:bold; color:#e8b860; margin-bottom:3px; }
   #ttDesc { color:#8a95aa; font-style:italic; margin-bottom:6px; font-size:11px; line-height:1.2; }
@@ -87,26 +131,48 @@
   .tt-row span:last-child { color:#e8b860; font-weight:bold; }
   .tt-diff { margin-top:6px; padding-top:6px; border-top:1px solid #333; font-size:11px; }
   .tt-up { color:#6c6; } .tt-down { color:#c66; } .tt-same { color:#aaa; }
+  #eventBanner { position:fixed; top:calc(var(--safe-top) + 120px); left:50%; transform:translateX(-50%); background:rgba(20,30,50,0.95); border:2px solid var(--accent); border-radius:8px; padding:12px 20px; color:#fff; font-weight:bold; font-size:14px; z-index:9000; display:none; text-align:center; max-width:90%; }
+  #dogIndicator { position:fixed; top:calc(var(--safe-top) + 10px); left:calc(var(--safe-left) + 170px); background:linear-gradient(145deg, #8a5a2a, #5a3a1a); border:2px solid #e8b860; border-radius:50%; width:calc(40px * var(--ui-scale)); height:calc(40px * var(--ui-scale)); display:none; align-items:center; justify-content:center; font-size:calc(22px * var(--ui-scale)); z-index:20; box-shadow:0 0 10px rgba(232,184,96,0.5), inset 0 0 6px rgba(0,0,0,0.4); }
 </style>
 </head>
 <body>
 <div id="game"></div>
-<div id="mpBadge" style="display:none;">👥 <span id="mpCount">0</span></div>
-<div id="hideOverlay"><h2>Ты прячешься...</h2></div>
-<div id="deathScreen"><h1>ТЫ УМЕР</h1><p id="deathReason" style="color:#aaa;margin-bottom:20px;"></p><button onclick="respawn()">ВСТАТЬ СНОВА</button></div>
-<div id="clock"><div>🕒 <span id="timeText">12:00</span></div><div id="dayText">Пн, 1 Янв, 2024</div><div id="weatherText">☀️ Ясно</div></div>
+<div id="eventBanner"></div>
+<div id="questBox"></div>
+<div id="hideOverlay"><h2 id="hideText">Ты прячешься...</h2><p id="hideSub" style="color:#aaa;font-size:14px;margin-top:10px;">Засыпаешь до утра!</p></div>
+<div id="jailOverlay">
+  <h1>🚔 ТЮРЬМА</h1>
+  <div class="jail-time" id="jailTimer">0:00</div>
+  <div class="jail-sub" id="jailSubText">Ты попал за решётку. Сиди смирно...</div>
+  <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center;">
+    <button class="buy" id="jailPayBtn">💰 Заплатить 200 монет</button>
+    <button id="jailEscapeBtn">🏃 Сбежать (21%)</button>
+  </div>
+</div>
+<div id="deathScreen">
+  <h1>ТЫ УМЕР</h1>
+  <p id="deathReason" style="color:#aaa;margin-bottom:20px;"></p>
+  <button onclick="respawn()">ВСТАТЬ СНОВА</button>
+</div>
+<div id="clock"><div>🕒 <span id="timeText">12:00</span></div><div id="dayText">Пт, 1 Янв, 2027</div><div id="weatherText">☀️ Ясно</div></div>
 <div id="hud">
   <div class="stat-box">❤️ <div class="bar-bg"><div id="hpbar" class="bar-fill hp" style="width:100%"></div></div></div>
   <div class="stat-box">🍖 <div class="bar-bg"><div id="hungerbar" class="bar-fill hunger" style="width:100%"></div></div></div>
   <div class="stat-box">💧 <div class="bar-bg"><div id="waterbar" class="bar-fill water" style="width:100%"></div></div></div>
+  <div class="stat-box">⭐ <span id="reputationText" style="color:#c8c8ff">0</span></div>
 </div>
+<div id="dogIndicator">🐕</div>
 <div id="log"></div>
 <div id="btnLeft" class="tbtn">◀</div><div id="btnRight" class="tbtn">▶</div><div id="btnJump" class="tbtn">⤒</div>
 <div id="btnAttack" class="tbtn">⚔</div><div id="btnPick" class="tbtn">✋</div><div id="btnCraft" class="tbtn">🔨</div>
 <div id="btnInv" class="tbtn">🎒</div><div id="btnThrow" class="tbtn">🍾</div><div id="btnSit" class="tbtn">🪑</div>
 <div id="btnRecord" class="tbtn">🏆</div><div id="ctxBtn" class="tbtn">🔍</div><div id="ctxBtnHide" class="tbtn">🛌</div>
+<!-- НОВАЯ КНОПКА ДЛЯ СОБАКИ -->
+<div id="btnDog" class="tbtn">🐕</div>
 <div id="tooltip"><div id="ttTitle"></div><div id="ttDesc"></div><div id="ttStats"></div></div>
-<div id="invPanel" class="modal"><div class="modal-box">
+<div id="actionMenu"></div>
+
+<div id="invPanel" class="modal"><div class="modal-box inv-box">
   <h3>🎒 Инвентарь</h3>
   <div class="inv-layout">
     <div class="eq-pane">
@@ -117,10 +183,11 @@
       <div class="eq-slot" data-slot="feet"><span class="ghost">👢</span><span class="real"></span></div>
       <div class="eq-slot" data-slot="weapon" style="border-color:#5588cc;"><span class="ghost">⚔</span><span class="real"></span></div>
     </div>
-    <div class="inv-pane"><div id="invGrid"></div></div>
+    <div class="grid-wrapper"><div id="invGrid"></div></div>
   </div>
   <button class="close-btn" id="closeInv">ЗАКРЫТЬ</button>
 </div></div>
+
 <div id="craftPanel" class="modal"><div class="modal-box">
   <h3>🔨 Верстак</h3><div class="craft-tabs" id="craftTabs"></div><div id="craftList"></div>
   <button class="close-btn" id="closeCraft">ЗАКРЫТЬ</button>
@@ -129,132 +196,51 @@
   <h3 id="shopTitle">🏪</h3><div id="shopItems" style="overflow-y:auto;max-height:50vh;"></div>
   <button class="close-btn" onclick="document.getElementById('shopPanel').classList.remove('open')">ЗАКРЫТЬ</button>
 </div></div>
+
 <div id="recordPanel" class="modal"><div class="modal-box">
   <h3>🏆 Рекорды</h3>
-  <div class="record-row"><span>Дней:</span> <span class="record-val" id="recDays">0</span></div>
-  <div class="record-row"><span>Монет:</span> <span class="record-val" id="recCoins">0</span></div>
-  <div class="record-row"><span>Гопников:</span> <span class="record-val" id="recKills">0</span></div>
-  <div class="record-row"><span>Боссов:</span> <span class="record-val" id="recBosses">0</span></div>
-  <div class="record-row"><span>Бизнес:</span> <span class="record-val" id="recBiz">0</span></div>
+  <div style="display:flex; gap:4px; margin-bottom:12px;">
+    <button class="craft-tab active" id="recTabScores" onclick="switchRecTab('scores')">Рекорды</button>
+    <button class="craft-tab" id="recTabAchieves" onclick="switchRecTab('achieves')">Достижения</button>
+  </div>
+  <div id="recScoresView">
+    <div class="record-row"><span>Дней:</span> <span class="record-val" id="recDays">0</span></div>
+    <div class="record-row"><span>Монет:</span> <span class="record-val" id="recCoins">0</span></div>
+    <div class="record-row"><span>Гопников:</span> <span class="record-val" id="recKills">0</span></div>
+    <div class="record-row"><span>Боссов:</span> <span class="record-val" id="recBosses">0</span></div>
+    <div class="record-row"><span>Бизнес:</span> <span class="record-val" id="recBiz">0</span></div>
+  </div>
+  <div id="recAchievesView" style="display:none; max-height:50vh; overflow-y:auto;">
+    <div id="achieveList"></div>
+  </div>
   <button class="close-btn" onclick="document.getElementById('recordPanel').classList.remove('open')">ЗАКРЫТЬ</button>
+</div></div>
+
+<div id="stashPanel" class="modal"><div class="modal-box inv-box">
+  <h3>🏚️ Тайник</h3>
+  <div style="display:flex;gap:8px;margin-bottom:8px;flex-shrink:0;">
+    <button class="close-btn" style="margin:0;flex:1;padding:8px;" onclick="stashAll()">⬅️ Положить</button>
+    <button class="close-btn" style="margin:0;flex:1;padding:8px;" onclick="unstashAll()">➡️ Забрать</button>
+  </div>
+  <div class="grid-wrapper"><div id="stashGrid"></div></div>
+  <button class="close-btn" onclick="document.getElementById('stashPanel').classList.remove('open')">ЗАКРЫТЬ</button>
 </div></div>
 
 <script src="https://cdn.jsdelivr.net/npm/phaser@3.70.0/dist/phaser.min.js"></script>
 <script>
-// ============ ПУНКТ 2: PWA ============
 (function initPWA() {
-  const manifest = {
-    name: "БОМЖ: ONLINE", short_name: "Бомж", start_url: ".", display: "standalone",
-    background_color: "#0a0a0f", theme_color: "#111111",
-    icons: [{ src: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='80' font-size='80'>🍺</text></svg>", sizes: "192x192", type: "image/svg+xml" }]
-  };
+  const manifest = { name: "БОМЖ", short_name: "Бомж", start_url: ".", display: "standalone", background_color: "#0a0a0f", theme_color: "#111111",
+    icons: [{ src: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='80' font-size='80'>🍺</text></svg>", sizes: "192x192", type: "image/svg+xml" }] };
   const manifestURL = URL.createObjectURL(new Blob([JSON.stringify(manifest)], { type: "application/manifest+json" }));
-  const link = document.createElement('link'); link.rel = 'manifest'; link.href = manifestURL;
-  document.head.appendChild(link);
-
-  const swCode = `
-    const CACHE = 'bum-v1';
-    self.addEventListener('install', e => { self.skipWaiting(); });
-    self.addEventListener('activate', e => { e.waitUntil(self.clients.claim()); });
-    self.addEventListener('fetch', e => { });
-  `;
+  const link = document.createElement('link'); link.rel = 'manifest'; link.href = manifestURL; document.head.appendChild(link);
+  const swCode = `self.addEventListener('install', e => { self.skipWaiting(); }); self.addEventListener('activate', e => { e.waitUntil(self.clients.claim()); }); self.addEventListener('fetch', e => { });`;
   const swURL = URL.createObjectURL(new Blob([swCode], { type: "application/javascript" }));
   if ('serviceWorker' in navigator) navigator.serviceWorker.register(swURL).catch(()=>{});
 })();
 
-// ============ СОХРАНЕНИЯ ============
-const SAVE_KEY = 'bum_save_v2';
-function saveGame() {
-  try {
-    localStorage.setItem(SAVE_KEY, JSON.stringify({
-      hp: state.hp, hunger: state.hunger, water: state.water,
-      equip: state.equip, inv: state.inv,
-      businessLevel, worldTime, worldDay, currentYear,
-      x: player ? player.x : 0, y: player ? player.y : 0
-    }));
-  } catch(e) { console.warn('[SAVE] ошибка', e); }
-}
-function loadGame() {
-  try {
-    const raw = localStorage.getItem(SAVE_KEY);
-    if (!raw) return false;
-    const data = JSON.parse(raw);
-    Object.assign(state, { hp: data.hp ?? 100, hunger: data.hunger ?? 100, water: data.water ?? 100, equip: data.equip || state.equip, inv: data.inv || state.inv });
-    businessLevel = data.businessLevel || 0;
-    worldTime = data.worldTime ?? 8*60;
-    worldDay = data.worldDay || 1;
-    currentYear = data.currentYear || 2024;
-    window.__savedX = data.x || 0;
-    console.log('[SAVE] Загружено, x =', window.__savedX);
-    return true;
-  } catch(e) { console.warn('[SAVE] ошибка загрузки', e); return false; }
-}
-setInterval(saveGame, 5000);
-window.addEventListener('beforeunload', saveGame);
-
-// ============ МУЛЬТИПЛЕЕР ============
-const mp = {
-  channel: null, selfId: 'p' + Math.floor(Math.random()*999999),
-  players: {},
-  init() {
-    try {
-      this.channel = new BroadcastChannel('bum_online');
-      this.channel.onmessage = (e) => this.onMessage(e.data);
-      setInterval(() => this.sendPosition(), 100);
-      setInterval(() => this.ping(), 2000);
-      console.log('[MP] канал открыт, id:', this.selfId);
-      document.getElementById('mpBadge').style.display = 'block';
-      // Один глобальный listener для лейблов (без утечки)
-      const scene = game.scene.scenes[0];
-      if (scene) {
-        scene.events.on('update', () => {
-          for (const id in this.players) {
-            const s = this.players[id];
-            if (s.active && s.label && s.label.active) {
-              s.label.x = s.x;
-              s.label.y = s.y - 40;
-            }
-          }
-        });
-      }
-    } catch(e) { console.warn('[MP] BroadcastChannel недоступен', e); }
-  },
-  sendPosition() {
-    if (!this.channel || !player) return;
-    this.channel.postMessage({ type:'pos', id:this.selfId, x:player.x, y:player.y, flip:player.flipX, weapon:state.equip.weapon, armor:state.equip.body });
-  },
-  ping() { if (this.channel) this.channel.postMessage({ type:'ping', id:this.selfId, t:Date.now() }); },
-  onMessage(data) {
-    if (data.id === this.selfId) return;
-    if (data.type === 'pos') {
-      if (!this.players[data.id]) this.spawnRemote(data.id, data.x, data.y);
-      const p = this.players[data.id];
-      if (p && p.active) { p.x = data.x; p.y = data.y; p.flipX = data.flip; }
-      this.updateCount();
-    } else if (data.type === 'leave') {
-      const p = this.players[data.id];
-      if (p) { if(p.label) p.label.destroy(); p.destroy(); delete this.players[data.id]; }
-      this.updateCount();
-    }
-  },
-  spawnRemote(id, x, y) {
-    const scene = game.scene.scenes[0]; if (!scene) return;
-    const s = scene.add.rectangle(x, y, 28, 56, 0x8fa8ff).setDepth(15);
-    const label = scene.add.text(x, y-40, '👤', { fontSize:'14px' }).setDepth(16);
-    s.label = label;
-    this.players[id] = s;
-  },
-  updateCount() {
-    document.getElementById('mpCount').textContent = Object.keys(this.players).length;
-  }
-};
-setTimeout(()=>mp.init(), 500);
-
-// ============ АДАПТИВ ============
 function computeUIScale(){ const base = Math.min(window.innerWidth, window.innerHeight)/380; document.documentElement.style.setProperty('--ui-scale', Math.max(0.85, Math.min(1.4, base)).toFixed(3)); }
 computeUIScale(); window.addEventListener('resize', computeUIScale);
 
-// ============ ЗВУК ============
 const AudioSys = {
   ctx:null, init(){ if(this.ctx) return; this.ctx=new (window.AudioContext||window.webkitAudioContext)(); },
   play(t){ if(!this.ctx) return; const time=this.ctx.currentTime,osc=this.ctx.createOscillator(),gain=this.ctx.createGain();
@@ -264,12 +250,13 @@ const AudioSys = {
     else if(t==='glass'){osc.type='triangle';osc.frequency.setValueAtTime(1500,time);osc.frequency.exponentialRampToValueAtTime(500,time+0.15);gain.gain.setValueAtTime(0.2,time);gain.gain.exponentialRampToValueAtTime(0.01,time+0.15);}
     else if(t==='pickup'){osc.type='sine';osc.frequency.setValueAtTime(600,time);osc.frequency.setValueAtTime(800,time+0.1);gain.gain.setValueAtTime(0.15,time);gain.gain.linearRampToValueAtTime(0,time+0.15);}
     else if(t==='coin'){osc.type='triangle';osc.frequency.setValueAtTime(1200,time);osc.frequency.exponentialRampToValueAtTime(1600,time+0.1);gain.gain.setValueAtTime(0.2,time);gain.gain.linearRampToValueAtTime(0,time+0.2);}
+    else if(t==='event'){osc.type='square';osc.frequency.setValueAtTime(400,time);osc.frequency.setValueAtTime(600,time+0.1);osc.frequency.setValueAtTime(800,time+0.2);gain.gain.setValueAtTime(0.2,time);gain.gain.linearRampToValueAtTime(0,time+0.3);}
+    else if(t==='error'){osc.type='sawtooth';osc.frequency.setValueAtTime(200,time);osc.frequency.setValueAtTime(120,time+0.1);gain.gain.setValueAtTime(0.2,time);gain.gain.linearRampToValueAtTime(0,time+0.2);}
     osc.connect(gain); gain.connect(this.ctx.destination); osc.start(time); osc.stop(time+0.25);
   }
 };
 document.body.addEventListener('touchstart',()=>AudioSys.init(),{once:true}); document.body.addEventListener('click',()=>AudioSys.init(),{once:true});
 
-// ============ ITEMS ============
 const ITEMS = {
   bottle:{name:'Пустая бутылка',icon:'🍾',type:'weapon',slot:'weapon',dmg:6,effect:'glass',throwable:true,desc:'Дробящее.',stats:{'Урон':6},price:2},
   rozochka:{name:'Розочка',icon:'🍾',type:'weapon',slot:'weapon',dmg:10,effect:'glass',throwable:true,desc:'С гвоздями.',stats:{'Урон':10},price:10},
@@ -299,6 +286,7 @@ const ITEMS = {
   water_bottle:{name:'Вода',icon:'🍶',type:'mat',use:'drink',desc:'Жажда.',stats:{'Жажда':40},price:5},
   food:{name:'Еда',icon:'🍞',type:'mat',use:'eat',desc:'Голод.',stats:{'Голод':40},price:5},
   beer:{name:'Пиво',icon:'🍺',type:'mat',use:'drink',desc:'Жажда.',stats:{'Жажда':20},price:10},
+  vodka:{name:'Водка',icon:'🥃',type:'mat',use:'drink',desc:'Лечит.',stats:{'Здоровье':10},price:25},
 };
 const RECIPES = [
   {out:'pipe',cost:{metal:1},cat:'weapon',label:'Труба'}, {out:'rozochka',cost:{bottle:1,nail:3,tape:1},cat:'weapon',label:'Розочка'},
@@ -312,15 +300,187 @@ const RECIPES = [
   {out:'gloves',cost:{leather:2,tape:1},cat:'armor',label:'Перчатки'}, {out:'jeans',cost:{rag:4,leather:1,tape:1},cat:'armor',label:'Штаны'},
   {out:'boots',cost:{leather:2,metal:1,tape:1},cat:'armor',label:'Ботинки'},
 ];
-const state = { hp:100, maxHp:100, hunger:100, water:100, equip:{head:null,body:null,hands:null,legs:null,feet:null,weapon:null},
-  inv:{ bottle:2, nail:5, tape:2, rag:2, coin:0, water_bottle:2, food:1, rebar:1, metal:5, board:2 } };
+
+const ALL_ACHIEVEMENTS = [
+  { id:'dog', name:'Лучший друг', icon:'🐕', desc:'Приручил собаку' },
+  { id:'lucky', name:'Везунчик', icon:'⭐', desc:'Нашёл редкий предмет' },
+  { id:'biz1', name:'Первый бизнес', icon:'💼', desc:'Открыл бизнес' },
+  { id:'biz5', name:'Бизнесмен', icon:'💼', desc:'Бизнес 5 уровня' },
+  { id:'biz10', name:'Империя', icon:'🏢', desc:'Бизнес 10 уровня' },
+  { id:'good', name:'Добряк', icon:'😇', desc:'Репутация +50' },
+  { id:'bad', name:'Опасный тип', icon:'😈', desc:'Репутация −50' },
+  { id:'wanted', name:'В розыске', icon:'🚔', desc:'10+ убийств' },
+  { id:'jail', name:'За решёткой', icon:'🔒', desc:'Попал в тюрьму' },
+  { id:'survive30', name:'30 дней', icon:'📅', desc:'Прожил 30 дней' },
+  { id:'rich', name:'Богач', icon:'💰', desc:'1000 монет' },
+  { id:'killer', name:'Убийца 100', icon:'💀', desc:'100 гопников' },
+  { id:'katana', name:'Обладатель катаны', icon:'🗡️', desc:'Нашёл или купил катану' },
+  { id:'win', name:'Купил квартиру', icon:'🏠', desc:'Победа (10000 монет)' },
+];
+
+const INV_COLS = 4, INV_ROWS = 10, INV_SIZE = INV_COLS * INV_ROWS;
+const STACKABLE = new Set(['rag','nail','tape','board','metal','leather','plastic','glass','wire','coin','water_bottle','food','beer','vodka','bottle']);
+
+const state = {
+  hp:100, maxHp:100, hunger:100, water:100,
+  equip:{head:null,body:null,hands:null,legs:null,feet:null,weapon:null},
+  slots: new Array(INV_SIZE).fill(null),
+  inv: {},
+  stashSlots: new Array(INV_SIZE).fill(null),
+  bank:0, reputation:0, petDog:false, dogHunger:100, achievements:[], foodAgeStart:null,
+  jailTime: 0, lastSaveTime: 0
+};
+
+function initStarterInventory(){
+  const starter = ['bottle','bottle','nail','nail','nail','nail','nail','tape','tape','rag','rag','rebar','metal','metal','metal','metal','metal','board','board','water_bottle','water_bottle','food'];
+  for(const id of starter) addToSlots(state.slots, id, 1);
+  syncInv();
+}
+
 let isDead=false, bossLootCache={}, isSitting=false, sittingCan=null, businessLevel=0, businessTimer=0;
-let worldTime=8*60, worldDay=1, currentYear=2024, currentWeather='clear', weatherTimer=0;
+let worldTime=8*60, worldDay=1, currentYear=2027, currentWeather='clear', weatherTimer=0;
 const daysOfWeek=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'], months=['Янв','Фев','Мар','Апр','Мая','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
 let records = JSON.parse(localStorage.getItem('bum_records')||'null') || { days:0, coins:0, kills:0, bosses:0, biz:0 };
 let _buyingBiz = false;
+let lastEventDay = 0;
+let traderNpc = null, traderX = 0;
+let currentKills = 0;
+let lastWarnCold = false;
+let petDogSprite = null;
+let inJail = false;
+let jailEscapeAttempts = 0;
+let policeChase = null;
+let policeSpawnCooldown = 0;
+let beggarNpc = null;
+let grandmaEventActive = false;
+
+let player, weaponSprite, groundBody;
+let npcs=[], trashBags=[], projectiles=[], buildings=[];
+let currentCtxTarget=null, attackCooldown=0, throwCooldown=0, isHiding=false;
+let weatherLayer, weatherParticles=[], lightningAlpha=0;
+const W0=window.innerWidth, H0=window.innerHeight, CHUNK_W=400;
+const loadedChunks=new Map();
+const npcChunks=new Map();
+const litWindows=[];
+let lastPhase='';
+let currentCraftTab='weapon';
+
+// === НОВОЕ: кулдаун кормления собаки ===
+let lastDogFeed = 0;
+const DOG_FEED_CD = 60000; // 60 секунд
+
+function syncInv(){
+  state.inv = {};
+  for(const s of state.slots){ if(s){ state.inv[s.id] = (state.inv[s.id]||0) + s.count; } }
+  if(state.inv.food > 0 && !state.foodAgeStart) state.foodAgeStart = {day:worldDay, time:worldTime};
+  if(!state.inv.food) state.foodAgeStart = null;
+}
+function invCount(id){ return state.inv[id]||0; }
+function addToSlots(slots, id, n=1){
+  const item = ITEMS[id]; if(!item) return 0;
+  let left = n;
+  if(STACKABLE.has(id)){
+    for(const s of slots){ if(s && s.id===id && left>0){ s.count += left; left = 0; } }
+  }
+  if(left>0){
+    for(let i=0;i<slots.length && left>0;i++){
+      if(!slots[i]){ slots[i] = {id, count: left}; left = 0; }
+    }
+  }
+  return n - left;
+}
+function invAdd(id, n=1){
+  const added = addToSlots(state.slots, id, n);
+  syncInv(); renderUI();
+  if(added>0) AudioSys.play(id==='coin'?'coin':'pickup');
+  if(added < n){ AudioSys.play('error'); log('❌ Инвентарь заполнен'); showEventBanner('❌ Инвентарь заполнен!'); }
+  return added;
+}
+function invRemove(id, n=1){
+  if(invCount(id) < n) return false;
+  let left = n;
+  for(let i=0;i<state.slots.length && left>0;i++){
+    const s = state.slots[i];
+    if(s && s.id===id){
+      const take = Math.min(s.count, left);
+      s.count -= take; left -= take;
+      if(s.count<=0) state.slots[i] = null;
+    }
+  }
+  syncInv(); renderUI(); return true;
+}
+
+const SAVE_KEY = 'bum_save_v4';
+function saveGame() {
+  try {
+    state.lastSaveTime = Date.now();
+    localStorage.setItem(SAVE_KEY, JSON.stringify({
+      hp: state.hp, hunger: state.hunger, water: state.water,
+      equip: state.equip, slots: state.slots, stashSlots: state.stashSlots,
+      businessLevel, worldTime, worldDay, currentYear,
+      x: player ? player.x : 0, y: player ? player.y : 0,
+      bank: state.bank || 0, reputation: state.reputation || 0,
+      petDog: state.petDog || false, dogHunger: state.dogHunger || 100,
+      achievements: state.achievements || [], foodAgeStart: state.foodAgeStart || null,
+      jailTime: state.jailTime || 0, lastSaveTime: state.lastSaveTime
+    }));
+  } catch(e) {}
+}
+function loadGame() {
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (!raw) return false;
+    const data = JSON.parse(raw);
+    Object.assign(state, { hp: data.hp ?? 100, hunger: data.hunger ?? 100, water: data.water ?? 100, equip: data.equip || state.equip });
+    if (Array.isArray(data.slots) && data.slots.length===INV_SIZE) state.slots = data.slots.filter(s => !s || ITEMS[s.id]);
+    if (Array.isArray(data.stashSlots) && data.stashSlots.length===INV_SIZE) state.stashSlots = data.stashSlots.filter(s => !s || ITEMS[s.id]);
+    businessLevel = data.businessLevel || 0;
+    worldTime = data.worldTime ?? 8*60;
+    worldDay = data.worldDay || 1;
+    currentYear = 2027;
+    state.bank = data.bank || 0;
+    state.reputation = data.reputation || 0;
+    state.petDog = data.petDog || false;
+    state.dogHunger = data.dogHunger ?? 100;
+    state.achievements = data.achievements || [];
+    state.foodAgeStart = data.foodAgeStart || null;
+    state.jailTime = data.jailTime || 0;
+    state.lastSaveTime = data.lastSaveTime || 0;
+    window.__savedX = data.x || 0;
+    if (businessLevel > 0 && state.lastSaveTime) {
+      const elapsed = Math.min(8 * 3600 * 1000, Date.now() - state.lastSaveTime);
+      const ticks = Math.floor(elapsed / 5000);
+      const income = ticks * businessLevel;
+      if (income > 0) {
+        addToSlots(state.slots, 'coin', income);
+        setTimeout(() => { log(`💼 Оффлайн-доход: +${income} 🪙`); showEventBanner(`💼 +${income} 🪙 (оффлайн)`); renderHUD(); }, 1000);
+      }
+    }
+    syncInv();
+    return true;
+  } catch(e) { return false; }
+}
+setInterval(saveGame, 5000);
+window.addEventListener('beforeunload', saveGame);
+
+function changeReputation(delta) {
+  state.reputation = Math.max(-100, Math.min(100, state.reputation + delta));
+  if (delta > 0) log(`😇 Репутация +${delta} (${state.reputation})`);
+  else if (delta < 0) log(`😠 Репутация ${delta} (${state.reputation})`);
+  if (state.reputation >= 50) addAchievement('good','Добряк');
+  if (state.reputation <= -50) addAchievement('bad','Опасный тип');
+  if (state.reputation >= 100) log('😇 Ты стал святым! Люди тебя обожают.');
+  if (state.reputation <= -100 && !inJail) {
+    log('🚔 Полиция объявила тебя в розыск!');
+    showEventBanner('🚔 ПОЛИЦИЯ В РОЗЫСКЕ!');
+  }
+  renderHUD();
+}
+
 function updateRecords(){ let ch=false; if(worldDay>records.days){records.days=worldDay;ch=true;} if(invCount('coin')>records.coins){records.coins=invCount('coin');ch=true;} if(businessLevel>records.biz){records.biz=businessLevel;ch=true;} if(ch) localStorage.setItem('bum_records', JSON.stringify(records)); }
 function getTodPhase(){ const h=Math.floor(worldTime/60); if(h>=6&&h<12)return'morning'; if(h>=12&&h<18)return'noon'; if(h>=18&&h<21)return'evening'; return'night'; }
+function showEventBanner(text) { const b = document.getElementById('eventBanner'); b.textContent = text; b.style.display = 'block'; AudioSys.play('event'); setTimeout(()=>{ b.style.display='none'; }, 3000); }
+function addAchievement(id, name) { if (state.achievements.includes(id)) return; state.achievements.push(id); log(`🏆 ДОСТИЖЕНИЕ: ${name}`); showEventBanner(`🏆 ${name}`); }
 function showTooltip(id,x,y){
   const it=ITEMS[id]; if(!it) return;
   const tt=document.getElementById('tooltip');
@@ -336,61 +496,13 @@ function showTooltip(id,x,y){
 }
 function hideTooltip(){ document.getElementById('tooltip').style.display='none'; }
 function log(msg){ const el=document.getElementById('log'); const d=document.createElement('div'); d.textContent='> '+msg; el.appendChild(d); while(el.children.length>30) el.removeChild(el.firstChild); el.scrollTop=el.scrollHeight; }
-function invAdd(id,n=1){ state.inv[id]=(state.inv[id]||0)+n; renderUI(); AudioSys.play(id==='coin'?'coin':'pickup'); }
-function invRemove(id,n=1){ if(!state.inv[id]||state.inv[id]<n) return false; state.inv[id]-=n; if(state.inv[id]<=0) delete state.inv[id]; renderUI(); return true; }
-function invCount(id){ return state.inv[id]||0; }
-function equip(id){
-  if(!ITEMS[id] || !state.inv[id] || state.inv[id] <= 0) return;
-  const item=ITEMS[id];
-  if(item.use==='eat'){ if(invCount(id)<=0) return; state.hunger=Math.min(100,state.hunger+40); invRemove(id); log('Съел еду'); return; }
-  if(item.use==='drink'){ if(invCount(id)<=0) return; state.water=Math.min(100,state.water+40); invRemove(id); invAdd('bottle',1); log('Выпил воду'); return; }
-  if(item.type==='mat'){ log('Материал.'); return; }
-  if(state.equip[item.slot]) invAdd(state.equip[item.slot],1);
-  state.equip[item.slot]=id; invRemove(id,1); log('Надето: '+item.name); updateSprite();
-}
-function unequip(slot){ if(state.equip[slot]){ invAdd(state.equip[slot],1); state.equip[slot]=null; renderUI(); updateSprite(); } }
-function craft(outId){ const r=RECIPES.find(x=>x.out===outId); if(!r) return; for(const [k,v] of Object.entries(r.cost)) if(invCount(k)<v){ log('Нужно: '+ITEMS[k].name); return; } for(const [k,v] of Object.entries(r.cost)) invRemove(k,v); invAdd(outId,1); log('Скрафчено: '+ITEMS[outId].name); }
-function buyBusiness(){
-  if(_buyingBiz) return; _buyingBiz = true; setTimeout(()=>_buyingBiz=false, 300);
-  if(businessLevel>0) return;
-  if(invCount('coin')<500){ log('Нужно 500 монет.'); return; }
-  invRemove('coin',500); businessLevel=1; businessTimer=0;
-  log('Бизнес открыт!'); updateRecords(); openShop('business');
-}
-function upgradeBusiness(){
-  if(_buyingBiz) return; _buyingBiz = true; setTimeout(()=>_buyingBiz=false, 300);
-  if(businessLevel>=10) return;
-  const cost=[0,500,1000,2000,4000,8000,16000,32000,64000,128000,256000][businessLevel];
-  if(invCount('coin')<cost){ log(`Нужно ${cost} монет.`); return; }
-  invRemove('coin',cost); businessLevel++; log(`Бизнес улучшен до ${businessLevel} ур.`); updateRecords(); openShop('business');
-}
-function openShop(type){
-  const panel=document.getElementById('shopPanel'), title=document.getElementById('shopTitle'), list=document.getElementById('shopItems');
-  list.innerHTML=''; panel.classList.add('open');
-  if(type==='shop'){ title.textContent='🏪 Магазин'; ['water_bottle','food','beer','tape','metal','leather'].forEach(id=>{ if(!ITEMS[id]) return; const it=ITEMS[id],price=it.price||10; const row=document.createElement('div'); row.className='shop-row'; row.innerHTML=`<span>${it.icon} ${it.name}</span> <span style="color:gold">${price} 🪙</span>`; const btn=document.createElement('button'); btn.textContent='Купить'; btn.disabled=invCount('coin')<price; btn.onclick=()=>{ if(invCount('coin')>=price){ invRemove('coin',price); invAdd(id,1); log('Куплено: '+it.name); openShop('shop'); } }; row.appendChild(btn); list.appendChild(row); }); }
-  else if(type==='metal'||type==='bottles'||type==='trash'){ const c={metal:{item:'metal',price:4,title:'♻️ Металлолом'},bottles:{item:'bottle',price:2,title:'🍾 Бутылки'},trash:{item:'rag',price:1,title:'🗑️ Мусор'}}[type]; title.textContent=c.title; const it=ITEMS[c.item]; const row=document.createElement('div'); row.className='shop-row'; row.innerHTML=`<span>${it.icon} ${it.name} (${invCount(c.item)})</span> <span style="color:gold">${c.price} 🪙/шт</span>`; const btn=document.createElement('button'); btn.textContent='Сдать'; btn.disabled=invCount(c.item)<=0; btn.onclick=()=>{ if(invCount(c.item)>0){ invRemove(c.item,1); invAdd('coin',c.price); log('Сдано.'); openShop(type); } }; row.appendChild(btn); list.appendChild(row); }
-  else if(type==='business'){ title.textContent='💼 Бизнес'; if(businessLevel===0){ const row=document.createElement('div'); row.className='shop-row'; row.innerHTML=`<span>Открыть бизнес</span> <span style="color:gold">500 🪙</span>`; const btn=document.createElement('button'); btn.textContent='Купить'; btn.disabled=invCount('coin')<500; btn.onclick=buyBusiness; row.appendChild(btn); list.appendChild(row); } else { const row=document.createElement('div'); row.className='shop-row'; row.innerHTML=`<span>Доход:</span> <span style="color:green">+${businessLevel} 🪙/5с</span>`; list.appendChild(row); if(businessLevel<10){ const cost=[0,500,1000,2000,4000,8000,16000,32000,64000,128000,256000][businessLevel]; const row2=document.createElement('div'); row2.className='shop-row'; row2.innerHTML=`<span>Улучшить до ${businessLevel+1} ур.</span> <span style="color:gold">${cost} 🪙</span>`; const btn2=document.createElement('button'); btn2.textContent='Улучшить'; btn2.disabled=invCount('coin')<cost; btn2.onclick=upgradeBusiness; row2.appendChild(btn2); list.appendChild(row2); } } }
-}
-function weaponTexture(wep){
-  const map = {
-    bottle:'w_bottle', rozochka:'w_rozochka', rebar:'w_rebar',
-    shiv:'w_shiv', pipe:'w_pipe', axe:'w_axe', crowbar:'w_crowbar',
-    hammer:'w_hammer', katana:'w_katana'
-  };
-  return map[wep] || 'w_bottle';
-}
+
+function weaponTexture(wep){ const map = { bottle:'w_bottle', rozochka:'w_rozochka', rebar:'w_rebar', shiv:'w_shiv', pipe:'w_pipe', axe:'w_axe', crowbar:'w_crowbar', hammer:'w_hammer', katana:'w_katana' }; return map[wep] || 'w_bottle'; }
 function updateSprite(){
-  if(!player) return;
+  if(!player || !weaponSprite) return;
   const wep = state.equip.weapon;
-  if(wep && weaponSprite){
-    weaponSprite.setVisible(true);
-    const tex = weaponTexture(wep);
-    if(weaponSprite.texture.key !== tex) weaponSprite.setTexture(tex);
-    const dir = player.flipX ? -1 : 1;
-    weaponSprite.x = player.x + dir*18;
-    weaponSprite.y = player.y - 10;
-    weaponSprite.flipX = player.flipX;
-  } else if(weaponSprite) weaponSprite.setVisible(false);
+  if(wep){ weaponSprite.setVisible(true); const tex = weaponTexture(wep); if(weaponSprite.texture.key !== tex) weaponSprite.setTexture(tex); const dir = player.flipX ? -1 : 1; weaponSprite.x = player.x + dir*18; weaponSprite.y = player.y - 10; weaponSprite.flipX = player.flipX; }
+  else { weaponSprite.setVisible(false); }
   const eq = state.equip;
   if(eq.body==='puhovik') player.setTint(0x80a0ff);
   else if(eq.body==='leather_jacket') player.setTint(0x505050);
@@ -398,153 +510,758 @@ function updateSprite(){
   else if(eq.body==='armor_plate') player.setTint(0x90a090);
   else player.clearTint();
 }
-let currentCraftTab='weapon';
 
-function renderHUD(){
-  if(isDead) return;
-  document.getElementById('hpbar').style.width=(state.hp/state.maxHp*100)+'%';
-  document.getElementById('hungerbar').style.width=state.hunger+'%';
-  document.getElementById('waterbar').style.width=state.water+'%';
-  document.getElementById('btnThrow').style.display=(invCount('bottle')>0||invCount('rozochka')>0)?'flex':'none';
-  document.getElementById('recDays').textContent=records.days;
-  document.getElementById('recCoins').textContent=records.coins;
-  document.getElementById('recKills').textContent=records.kills;
-  document.getElementById('recBosses').textContent=records.bosses;
-  document.getElementById('recBiz').textContent=records.biz;
+// === ТЮРЬМА ===
+function goToJail(){
+  if (inJail) return;
+  inJail = true;
+  state.jailTime = 15 * 60;
+  jailEscapeAttempts = 0;
+  policeChase = null;
+  addAchievement('jail', 'За решёткой');
+  log('🚔 Тебя поймали! Ты в тюрьме на 15 минут.');
+  document.getElementById('jailOverlay').style.display = 'flex';
+  document.getElementById('jailSubText').textContent = 'Ты попал за решётку. Сиди смирно...';
+  document.getElementById('jailPayBtn').disabled = false;
+  document.getElementById('jailPayBtn').style.display = '';
+  document.getElementById('jailEscapeBtn').disabled = false;
+  document.getElementById('jailEscapeBtn').textContent = '🏃 Сбежать (21%)';
+  document.getElementById('jailEscapeBtn').style.display = '';
+  if (player) { player.body.setVelocity(0,0); player.setVisible(false); }
+  document.querySelectorAll('.tbtn').forEach(b => b.style.display = 'none');
+  document.getElementById('hud').style.display = 'none';
+  document.getElementById('clock').style.display = 'none';
+  document.getElementById('log').style.display = 'none';
+  document.getElementById('questBox').style.display = 'none';
+  updateJailUI();
 }
-function renderInventory(){
-  document.querySelectorAll('.eq-slot').forEach(el=>{
-    const slot=el.dataset.slot;
-    const eqItem=state.equip[slot];
-    const real=el.querySelector('.real');
-    if(real) real.textContent=eqItem?ITEMS[eqItem].icon:'';
-    el.classList.toggle('active',!!eqItem);
-    if(el._bound) return;
-    el._bound = true;
-    let lpTimer=null, wasLong=false;
-    const start=()=>{ wasLong=false; const r=el.getBoundingClientRect();
-      lpTimer=setTimeout(()=>{ wasLong=true; if(eqItem) showTooltip(eqItem,r.left+r.width/2,r.top); },400); };
-    const end=()=>{ clearTimeout(lpTimer); if(!wasLong) unequip(slot); hideTooltip(); };
-    el.onmousedown=start;
-    el.onmouseup=end;
-    el.onmouseleave=()=>{ clearTimeout(lpTimer); hideTooltip(); };
-    el.ontouchstart=(e)=>{ e.preventDefault(); start(); };
-    el.ontouchend=(e)=>{ e.preventDefault(); end(); };
-    el.ontouchcancel=end;
-  });
-  const grid=document.getElementById('invGrid');
-  grid.innerHTML='';
-  Object.keys(state.inv).forEach(id=>{
-    if(state.inv[id]<=0) return;
-    const it=ITEMS[id];
-    const s=document.createElement('div');
-    s.className='slot '+(it.unique?'unique-type':it.type==='weapon'?'weapon-type':it.type==='armor'?'armor-type':'mat-type');
-    s.textContent=it.icon;
-    const c=document.createElement('span'); c.className='count'; c.textContent=state.inv[id]; s.appendChild(c);
-    let lpTimer=null, wasLong=false;
-    const start=()=>{ wasLong=false; const r=s.getBoundingClientRect();
-      lpTimer=setTimeout(()=>{ wasLong=true; showTooltip(id,r.left+r.width/2,r.top); },400); };
-    const end=()=>{ clearTimeout(lpTimer); if(!wasLong) equip(id); hideTooltip(); };
-    s.onmousedown=start;
-    s.onmouseup=end;
-    s.onmouseleave=()=>{ clearTimeout(lpTimer); hideTooltip(); };
-    s.ontouchstart=(e)=>{ e.preventDefault(); start(); };
-    s.ontouchend=(e)=>{ e.preventDefault(); end(); };
-    s.ontouchcancel=end;
-    grid.appendChild(s);
-  });
+function updateJailUI(){
+  const pay = document.getElementById('jailPayBtn');
+  const esc = document.getElementById('jailEscapeBtn');
+  const coins = invCount('coin');
+  pay.disabled = coins < 200;
+  if (coins < 200) {
+    pay.textContent = '💰 Недостаточно монет (нужно 200)';
+  } else {
+    pay.textContent = '💰 Заплатить 200 монет';
+  }
+  esc.disabled = jailEscapeAttempts >= 3;
+  if (jailEscapeAttempts >= 3) {
+    esc.textContent = '🏃 Побег невозможен';
+  } else {
+    esc.textContent = `🏃 Сбежать (21%) [попыток: ${jailEscapeAttempts}/3]`;
+  }
 }
-function renderCraft(){
-  const tabs=document.getElementById('craftTabs');
-  tabs.innerHTML='';
-  ['weapon','armor'].forEach(cat=>{
-    const b=document.createElement('button');
-    b.className='craft-tab '+(currentCraftTab===cat?'active':'');
-    b.textContent=cat==='weapon'?'Оружие':'Броня';
-    b.onclick=()=>{ currentCraftTab=cat; renderCraft(); };
-    tabs.appendChild(b);
-  });
-  const cl=document.getElementById('craftList');
-  cl.innerHTML='';
-  RECIPES.filter(r=>r.cat===currentCraftTab).forEach(r=>{
-    const b=document.createElement('button');
-    b.className='recipe-btn';
-    const can=Object.entries(r.cost).every(([k,v])=>invCount(k)>=v);
-    b.disabled=!can;
-    const costHtml=Object.entries(r.cost)
-      .map(([k,v])=>`<span style="color:${invCount(k)>=v?'#8c8':'#c88'}">${ITEMS[k].icon}${v}</span>`)
-      .join(' ');
-    b.innerHTML=`<div class="title">${ITEMS[r.out].icon} ${r.label}</div><div class="cost">${costHtml}</div>`;
-    b.onclick=()=>craft(r.out);
-    cl.appendChild(b);
-  });
+function updateJail(delta){
+  if (!inJail) return;
+  state.jailTime -= delta/1000;
+  if (state.jailTime <= 0) { releaseFromJail('served'); return; }
+  const m = Math.floor(state.jailTime / 60);
+  const s = Math.floor(state.jailTime % 60);
+  document.getElementById('jailTimer').textContent = `${m}:${String(s).padStart(2,'0')}`;
 }
-function renderUI(){
+function releaseFromJail(reason){
+  inJail = false;
+  state.jailTime = 0;
+  let bonus = 0;
+  if (reason === 'served') bonus = 50;
+  else if (reason === 'paid') bonus = 80;
+  else if (reason === 'escaped') bonus = 10;
+  changeReputation(bonus);
+  if (state.reputation > -10) state.reputation = -10;
+  document.getElementById('jailOverlay').style.display = 'none';
+  if (player) { player.setVisible(true); }
+  document.querySelectorAll('.tbtn').forEach(b => b.style.display = '');
+  document.getElementById('hud').style.display = '';
+  document.getElementById('clock').style.display = '';
+  document.getElementById('log').style.display = '';
+  const label = reason === 'served' ? 'отсидел' : reason === 'paid' ? 'заплатил' : 'сбежал';
+  log(`🔓 Ты вышел из тюрьмы (${label}). +${bonus} к репутации.`);
+  showEventBanner(`🔓 +${bonus} репутации`);
   renderHUD();
-  if(document.getElementById('invPanel').classList.contains('open')) renderInventory();
-  if(document.getElementById('craftPanel').classList.contains('open')) renderCraft();
 }
-
-const held={ left:false, right:false, jump:false };
-function bindHold(id,prop){ const el=document.getElementById(id); const on=e=>{e.preventDefault();held[prop]=true;el.classList.add('held');}; const off=e=>{e.preventDefault();held[prop]=false;el.classList.remove('held');}; el.addEventListener('touchstart',on,{passive:false}); el.addEventListener('touchend',off,{passive:false}); el.addEventListener('touchcancel',off,{passive:false}); el.addEventListener('mousedown',on); el.addEventListener('mouseup',off); el.addEventListener('mouseleave',off); }
-bindHold('btnLeft','left'); bindHold('btnRight','right'); bindHold('btnJump','jump');
-function tap(id,fn){
-  const el = document.getElementById(id);
-  let touched = false;
-  el.addEventListener('touchstart', e=>{ e.preventDefault(); touched = true; fn(); }, {passive:false});
-  el.addEventListener('click', e=>{ e.preventDefault(); if(!touched) fn(); touched = false; });
-}
-tap('btnAttack',()=>doAttack()); tap('btnPick',()=>doPickup()); tap('btnThrow',()=>doThrow());
-document.getElementById('btnCraft').onclick=()=>{ document.getElementById('craftPanel').classList.add('open'); renderCraft(); };
-document.getElementById('closeCraft').onclick=()=>document.getElementById('craftPanel').classList.remove('open');
-document.getElementById('btnInv').onclick=()=>{ document.getElementById('invPanel').classList.add('open'); renderInventory(); };
-document.getElementById('closeInv').onclick=()=>{ document.getElementById('invPanel').classList.remove('open'); hideTooltip(); };
-document.getElementById('btnRecord').onclick=()=>document.getElementById('recordPanel').classList.add('open');
-function die(reason){
-  isDead=true;
-  if(isSitting) standUp();
-  bossLootCache = {};
-  document.getElementById('deathScreen').style.display='flex';
-  document.getElementById('deathReason').textContent=reason;
-  state.hp=0;
-}
-function respawn(){ isDead=false; state.hp=100; state.hunger=100; state.water=100; document.getElementById('deathScreen').style.display='none'; log('Очнулся.'); renderUI(); }
-
-let player, weaponSprite, groundBody;
-let npcs=[], trashBags=[], projectiles=[], buildings=[];
-let currentCtxTarget=null, attackCooldown=0, throwCooldown=0, isHiding=false;
-let weatherLayer, weatherParticles=[], lightningAlpha=0;
-const W0=window.innerWidth, H0=window.innerHeight, CHUNK_W=400;
-const loadedChunks=new Map();
-const npcChunks=new Map();
-const litWindows=[];
-let lastPhase='';
-
-const config = {
-  type:Phaser.CANVAS, parent:'game', width:W0, height:H0, backgroundColor:'#5dade2', pixelArt:true,
-  scale:{ mode:Phaser.Scale.FIT, autoCenter:Phaser.Scale.CENTER_BOTH, width:W0, height:H0 },
-  physics:{ default:'arcade', arcade:{ gravity:{y:1200}, debug:false } },
-  scene:{ preload, create, update }
+document.getElementById('jailPayBtn').onclick = () => {
+  if (invCount('coin') < 200) {
+    log('❌ Недостаточно монет для штрафа (нужно 200)');
+    showEventBanner('❌ Недостаточно монет (нужно 200)');
+    AudioSys.play('error');
+    return;
+  }
+  invRemove('coin', 200);
+  log('💰 Заплатил штраф 200 монет.');
+  releaseFromJail('paid');
+};
+document.getElementById('jailEscapeBtn').onclick = () => {
+  if (jailEscapeAttempts >= 3) return;
+  jailEscapeAttempts++;
+  if (Math.random() < 0.21) {
+    log('🏃 Побег удался!');
+    showEventBanner('🏃 Побег!');
+    releaseFromJail('escaped');
+  } else {
+    state.jailTime *= 2;
+    log(`❌ Побег провалился! Срок удвоен до ${Math.round(state.jailTime/60)} мин.`);
+    showEventBanner('❌ Побег провалился! Срок удвоен');
+    AudioSys.play('error');
+    if (jailEscapeAttempts >= 3) log('🚫 Попытки исчерпаны — побег невозможен.');
+    updateJailUI();
+  }
 };
 
-// ============ ЗАГРУЗКА ДО СТАРТА ИГРЫ (критично) ============
-loadGame();
+// === ПОЛИЦИЯ ===
+function spawnPolice(){
+  if (policeChase && policeChase.sprite && policeChase.sprite.active) return;
+  const scene = game.scene.scenes[0];
+  if (!scene || !player) return;
+  const groundY = scene.scale.height - 20;
+  const npc = scene.physics.add.sprite(player.x + (player.flipX?-300:300), groundY - 24, 'npc_cop');
+  npc.body.setSize(24, 48); npc.body.setOffset(4, 8);
+  npc.isThug = true; npc.isNpc = true; npc.isCop = true;
+  npc.hp = 100; npc.maxHp = 100;
+  npc.hitsLanded = 0;
+  npc.lastAttack = 0;
+  npc.setDepth(15);
+  scene.physics.add.collider(npc, groundBody);
+  npcs.push(npc);
+  policeChase = { sprite: npc };
+  log('👮 Полицейский гонится за тобой!');
+}
+function updatePoliceChase(time, delta){
+  if (!policeChase || inJail) return;
+  if (!policeChase.sprite || !policeChase.sprite.active) {
+    policeChase = null;
+    policeSpawnCooldown = 10000;
+    return;
+  }
+  const cop = policeChase.sprite;
+  const dist = Phaser.Math.Distance.Between(player.x, player.y, cop.x, cop.y);
+  const dir = player.x > cop.x ? 1 : -1;
+  if (dist > 55) {
+    cop.body.setVelocityX(dir * 180);
+  } else {
+    cop.body.setVelocityX(0);
+  }
+  cop.flipX = dir < 0;
+  if (dist < 65 && (!cop.lastAttack || time - cop.lastAttack > 1000)) {
+    cop.lastAttack = time;
+    cop.hitsLanded++;
+    const dmg = 5;
+    state.hp = Math.max(0, state.hp - dmg);
+    game.scene.scenes[0].tweens.add({ targets: cop, angle: dir<0?-20:20, yoyo:true, duration:100 });
+    AudioSys.play('punch');
+    log(`👮 Полицейский бьёт тебя! (${cop.hitsLanded}/5)`);
+    if (cop.hitsLanded >= 5) {
+      log('👮 Полицейский скрутил тебя!');
+      goToJail();
+      return;
+    }
+    if (state.hp <= 0) die('Тебя забили гопники.');
+  }
+}
 
+function updateDogCombat(time, delta){
+  if (!petDogSprite || !petDogSprite.active || inJail || isDead) return;
+  let target = null, minDist = 120;
+  npcs.forEach(npc => {
+    if (!npc.active || !npc.isThug) return;
+    const d = Phaser.Math.Distance.Between(petDogSprite.x, petDogSprite.y, npc.x, npc.y);
+    if (d < minDist) { minDist = d; target = npc; }
+  });
+  if (target) {
+    const dir = target.x > petDogSprite.x ? 1 : -1;
+    petDogSprite.body.setVelocityX(dir * 250);
+    petDogSprite.flipX = dir < 0;
+    if (minDist < 40) {
+      if (!petDogSprite.lastBite || time - petDogSprite.lastBite > 800) {
+        petDogSprite.lastBite = time;
+        target.hp -= 3;
+        target.setTint(0xff6666);
+        game.scene.scenes[0].time.delayedCall(150, () => { if(target.active) target.clearTint(); });
+        spawnHitEffect(target.x, target.y - 10, 'punch');
+        if (target.hp <= 0) {
+          if (target.hpBar) target.hpBar.destroy();
+          spawnLoot(target); target.destroy(); npcs = npcs.filter(n => n.active);
+          if (target.isThug && !target.isBoss) { records.kills++; currentKills++; }
+          if (target.isBoss) records.bosses++;
+          updateRecords();
+        }
+      }
+    }
+  }
+}
+
+function equipSlotIndex(i){
+  const s=state.slots[i]; if(!s) return;
+  const item=ITEMS[s.id];
+  if(item.use==='eat'){ if(invCount(s.id)<=0) return; state.hunger=Math.min(100,state.hunger+40); invRemove(s.id,1); log('Съел еду'); return; }
+  if(item.use==='drink'){
+    if(invCount(s.id)<=0) return;
+    if(s.id==='vodka'){ state.hp=Math.min(100,state.hp+10); state.water=Math.max(0,state.water-20); invRemove(s.id,1); log('Выпил водки — полегчало, но сушняк'); return; }
+    state.water=Math.min(100,state.water+40); invRemove(s.id,1); invAdd('bottle',1); log('Выпил воду'); return;
+  }
+  if(item.type==='mat'){ log('Материал.'); return; }
+  if(state.equip[item.slot]){
+    const old=state.equip[item.slot];
+    state.slots[i]=null;
+    const oldAdded = addToSlots(state.slots, old, 1);
+    if(oldAdded<1){ state.slots[i]={id:old,count:1}; AudioSys.play('error'); log('❌ Инвентарь заполнен'); return; }
+    state.equip[item.slot]=s.id;
+  } else {
+    state.equip[item.slot]=s.id;
+    state.slots[i]=null;
+  }
+  syncInv(); renderUI(); updateSprite();
+  log('Надето: '+item.name);
+}
+function unequip(slot){
+  if(state.equip[slot]){
+    const added = addToSlots(state.slots, state.equip[slot], 1);
+    if(added<1){ AudioSys.play('error'); log('❌ Инвентарь заполнен'); return; }
+    state.equip[slot]=null;
+    syncInv(); renderUI(); updateSprite();
+  }
+}
+function craft(outId){ const r=RECIPES.find(x=>x.out===outId); if(!r) return; for(const [k,v] of Object.entries(r.cost)) if(invCount(k)<v){ log('Нужно: '+ITEMS[k].name); return; } for(const [k,v] of Object.entries(r.cost)) invRemove(k,v); invAdd(outId,1); log('Скрафчено: '+ITEMS[outId].name); }
+
+// === ИСПРАВЛЕНО: иконки для всех дропов ===
+function dropFromSlot(i){
+  const s = state.slots[i]; if(!s) return;
+  const id = s.id;
+  if(s.count > 1) s.count -= 1; else state.slots[i] = null;
+  syncInv(); renderUI();
+  log(`Выброшено: ${ITEMS[id].name}`);
+  if (player && game.scene.scenes[0]) {
+    const scene = game.scene.scenes[0];
+    const spr = scene.add.sprite(player.x + (Math.random()*40-20), player.y - 20, pickupTextureFor(id)).setScale(1.5);
+    spr.itemId = id; spr.isPickup = true;
+    scene.tweens.add({ targets: spr, y: spr.y - 8, yoyo: true, repeat: -1, duration: 1000 });
+  }
+}
+
+// === ИСПРАВЛЕНО: маппинг текстур для дропа ===
+function pickupTextureFor(id){
+  const map = {
+    food:'item_food', water_bottle:'item_water', rag:'item_rag_mat',
+    rozochka:'item_rozochka', bottle:'item_bottle', coin:'item_coin'
+  };
+  return map[id] || 'item_coin';
+}
+
+function renderStash(){
+  const grid=document.getElementById('stashGrid'); if(!grid) return;
+  grid.innerHTML='';
+  for(let i=0;i<INV_SIZE;i++){
+    const s=state.stashSlots[i];
+    const cell=document.createElement('div');
+    cell.className='slot'+(s?'':' empty');
+    if(s){ cell.textContent=ITEMS[s.id].icon; if(s.count>1){const c=document.createElement('span');c.className='count';c.textContent=s.count;cell.appendChild(c);} }
+    let lastTap = 0;
+    cell.onclick = () => {
+      const now = Date.now();
+      if (now - lastTap < 300) {
+        if(s){ const added=addToSlots(state.slots,s.id,s.count); if(added>0){ s.count-=added; if(s.count<=0) state.stashSlots[i]=null; syncInv(); renderUI(); renderStash(); } else { AudioSys.play('error'); log('❌ Инвентарь заполнен'); showEventBanner('❌ Инвентарь заполнен!'); } }
+        hideTooltip();
+      } else {
+        if(s && document.getElementById('tooltip').style.display === 'block') { hideTooltip(); }
+        else { const r = cell.getBoundingClientRect(); if(s) showTooltip(s.id, r.left + r.width/2, r.top); }
+      }
+      lastTap = now;
+    };
+    cell.onmouseleave = hideTooltip;
+    grid.appendChild(cell);
+  }
+}
+function stashAll(){
+  for(let i=0;i<state.slots.length;i++){
+    const s=state.slots[i]; if(!s) continue;
+    const added=addToSlots(state.stashSlots,s.id,s.count);
+    if(added>0){ s.count-=added; if(s.count<=0) state.slots[i]=null; }
+  }
+  syncInv(); renderUI(); renderStash();
+}
+function unstashAll(){
+  for(let i=0;i<state.stashSlots.length;i++){
+    const s=state.stashSlots[i]; if(!s) continue;
+    const added=addToSlots(state.slots,s.id,s.count);
+    if(added>0){ s.count-=added; if(s.count<=0) state.stashSlots[i]=null; }
+  }
+  syncInv(); renderUI(); renderStash();
+}
+function openStash(){ document.getElementById('stashPanel').classList.add('open'); renderStash(); }
+
+function buyBusiness(){ if(_buyingBiz) return; _buyingBiz = true; setTimeout(()=>_buyingBiz=false, 300); if(businessLevel>0) return; if(invCount('coin')<500){ log('Нужно 500 монет.'); return; } invRemove('coin',500); businessLevel=1; businessTimer=0; log('Бизнес открыт!'); updateRecords(); openShop('business'); addAchievement('biz1','Первый бизнес'); }
+function upgradeBusiness(){ if(_buyingBiz) return; _buyingBiz = true; setTimeout(()=>_buyingBiz=false, 300); if(businessLevel>=10) return; const cost=[0,500,1000,2000,4000,8000,16000,32000,64000,128000,256000][businessLevel]; if(invCount('coin')<cost){ log(`Нужно ${cost} монет.`); return; } invRemove('coin',cost); businessLevel++; log(`Бизнес улучшен до ${businessLevel} ур.`); updateRecords(); openShop('business'); if(businessLevel>=10) addAchievement('biz10','Империя'); }
+
+function openShop(type){
+  const panel=document.getElementById('shopPanel'), title=document.getElementById('shopTitle'), list=document.getElementById('shopItems');
+  list.innerHTML=''; panel.classList.add('open');
+  const repDiscount = state.reputation >= 30 ? 0.8 : (state.reputation <= -30 ? 1.2 : 1.0);
+  if(type==='shop'){
+    title.textContent='🏪 Магазин' + (repDiscount<1?' (скидка 20%)':repDiscount>1?' (наценка 20%)':'');
+    ['water_bottle','food','beer','vodka','tape','metal','leather'].forEach(id=>{
+      if(!ITEMS[id]) return; const it=ITEMS[id],price=Math.round((it.price||10)*repDiscount);
+      const row=document.createElement('div'); row.className='shop-row';
+      row.innerHTML=`<span>${it.icon} ${it.name}</span> <span style="color:gold">${price} 🪙</span>`;
+      const btn=document.createElement('button'); btn.textContent='Купить'; btn.disabled=invCount('coin')<price;
+      btn.onclick=()=>{ if(invCount('coin')>=price){ invRemove('coin',price); invAdd(id,1); log('Куплено: '+it.name); openShop('shop'); } };
+      row.appendChild(btn); list.appendChild(row);
+    });
+  } else if(type==='metal'||type==='bottles'||type==='trash'){
+    const c={metal:{item:'metal',price:4,title:'♻️ Металлолом'},bottles:{item:'bottle',price:2,title:'🍾 Бутылки'},trash:{item:'rag',price:1,title:'🗑️ Мусор'}}[type];
+    title.textContent=c.title; const it=ITEMS[c.item];
+    const row=document.createElement('div'); row.className='shop-row';
+    row.innerHTML=`<span>${it.icon} ${it.name} (${invCount(c.item)})</span> <span style="color:gold">${c.price} 🪙/шт</span>`;
+    const btn=document.createElement('button'); btn.textContent='Сдать'; btn.disabled=invCount(c.item)<=0;
+    btn.onclick=()=>{ if(invCount(c.item)>0){ invRemove(c.item,1); invAdd('coin',c.price); if(type==='bottles') changeReputation(0.5); log('Сдано.'); openShop(type); } };
+    row.appendChild(btn); list.appendChild(row);
+  } else if(type==='bank'){
+    title.textContent='🏦 Банк';
+    const row=document.createElement('div'); row.className='shop-row';
+    row.innerHTML=`<span>На счету:</span> <span style="color:gold">${state.bank} 🪙</span>`; list.appendChild(row);
+    const row2=document.createElement('div'); row2.className='shop-row';
+    row2.innerHTML=`<span>Положить всё</span> <span>${invCount('coin')} 🪙</span>`;
+    const btn2=document.createElement('button'); btn2.textContent='Внести'; btn2.disabled=invCount('coin')<=0;
+    btn2.onclick=()=>{ const amt=invCount('coin'); if(amt>0){ invRemove('coin',amt); state.bank+=amt; log(`Внёс ${amt} 🪙`); openShop('bank'); } };
+    row2.appendChild(btn2); list.appendChild(row2);
+    const row3=document.createElement('div'); row3.className='shop-row';
+    row3.innerHTML=`<span>Снять всё</span> <span>${state.bank} 🪙</span>`;
+    const btn3=document.createElement('button'); btn3.textContent='Снять'; btn3.disabled=state.bank<=0;
+    btn3.onclick=()=>{ const amt=state.bank; if(amt>0){ state.bank=0; invAdd('coin',amt); log(`Снял ${amt} 🪙`); openShop('bank'); } };
+    row3.appendChild(btn3); list.appendChild(row3);
+    const row4=document.createElement('div'); row4.className='shop-row';
+    row4.innerHTML=`<span>🙏 Пожертвовать 50 монет</span> <span style="color:#8c8">+2 репутации</span>`;
+    const btn4=document.createElement('button'); btn4.textContent='Пожертвовать'; btn4.disabled=invCount('coin')<50;
+    btn4.onclick=()=>{ if(invCount('coin')>=50){ invRemove('coin',50); changeReputation(2); log('🙏 Пожертвовал 50 монет (+2 репутации)'); openShop('bank'); } };
+    row4.appendChild(btn4); list.appendChild(row4);
+  } else if(type==='trader'){
+    title.textContent='🧔 Барыга' + (state.reputation <= -30 ? ' (недоволен тобой)' : '');
+    ['katana','armor_plate','leather_jacket','crowbar','vodka','beer'].forEach(id=>{
+      const it=ITEMS[id]; if(!it) return; const price=Math.round((it.price||50)*2*repDiscount);
+      const row=document.createElement('div'); row.className='shop-row';
+      row.innerHTML=`<span>${it.icon} ${it.name}</span> <span style="color:gold">${price} 🪙</span>`;
+      const btn=document.createElement('button'); btn.textContent='Купить'; btn.disabled=invCount('coin')<price || state.reputation <= -30;
+      if (state.reputation <= -30) btn.textContent = 'Отказ';
+      btn.onclick=()=>{ if(invCount('coin')>=price && state.reputation > -30){ invRemove('coin',price); invAdd(id,1); log('Куплено у барыги: '+it.name); openShop('trader'); } };
+      row.appendChild(btn); list.appendChild(row);
+    });
+  } else if(type==='business'){
+    title.textContent='💼 Бизнес';
+    if(businessLevel===0){
+      const row=document.createElement('div'); row.className='shop-row';
+      row.innerHTML=`<span>Открыть бизнес</span> <span style="color:gold">500 🪙</span>`;
+      const btn=document.createElement('button'); btn.textContent='Купить'; btn.disabled=invCount('coin')<500; btn.onclick=buyBusiness;
+      row.appendChild(btn); list.appendChild(row);
+    } else {
+      const row=document.createElement('div'); row.className='shop-row';
+      row.innerHTML=`<span>Доход:</span> <span style="color:green">+${businessLevel} 🪙/5с</span>`; list.appendChild(row);
+      if(businessLevel<10){
+        const cost=[0,500,1000,2000,4000,8000,16000,32000,64000,128000,256000][businessLevel];
+        const row2=document.createElement('div'); row2.className='shop-row';
+        row2.innerHTML=`<span>Улучшить до ${businessLevel+1} ур.</span> <span style="color:gold">${cost} 🪙</span>`;
+        const btn2=document.createElement('button'); btn2.textContent='Улучшить'; btn2.disabled=invCount('coin')<cost; btn2.onclick=upgradeBusiness;
+        row2.appendChild(btn2); list.appendChild(row2);
+      }
+    }
+  }
+}
+
+function triggerRandomEvent() {
+  const roll = Math.random();
+  if (roll < 0.20) { const amt = 10 + Math.floor(Math.random()*40); invAdd('coin', amt); log(`💼 Нашёл кошелёк! +${amt} монет`); showEventBanner(`💼 +${amt} 🪙`); }
+  else if (roll < 0.40) { const dmg = 5 + Math.floor(Math.random()*10); state.hp = Math.max(0, state.hp - dmg); log(`🐕 Собака укусила! -${dmg} HP`); showEventBanner(`🐕 -${dmg} ❤️`); }
+  else if (roll < 0.60) { invAdd('food',1); log('👴 Добрый прохожий дал еду'); showEventBanner('👴 +🍞'); }
+  else if (roll < 0.75) { const stolen = invCount('coin'); if (stolen > 0) { invRemove('coin', stolen); log(`💀 Гопники обчистили! -${stolen}`); showEventBanner(`💀 -${stolen} 🪙`); } else log('💀 Гопники прошли мимо'); }
+  else if (roll < 0.90) { invAdd('vodka',1); log('🍶 Нашёл водку'); showEventBanner('🍶 Водка!'); }
+  else { const amt = 5 + Math.floor(Math.random()*10); invAdd('coin', amt); log(`✨ +${amt} 🪙`); showEventBanner(`✨ +${amt} 🪙`); }
+}
+function adoptDog() {
+  if (state.petDog) { log('🐕 Уже есть собака'); return; }
+  const needFood = state.reputation >= 20 ? 1 : 3;
+  if (invCount('food') < needFood) { log(`🐕 Нужно ${needFood} еды`); return; }
+  invRemove('food', needFood); state.petDog = true; state.dogHunger = 100;
+  document.getElementById('dogIndicator').style.display = 'flex';
+  const scene = game.scene.scenes[0];
+  if (petDogSprite && petDogSprite.active) petDogSprite.destroy();
+  petDogSprite = scene.physics.add.sprite(player.x - 40, player.y - 20, 'npc_dog').setDepth(12);
+  petDogSprite.body.setSize(40, 32); petDogSprite.body.setAllowGravity(true);
+  scene.physics.add.collider(petDogSprite, groundBody);
+  log('🐕 Собака приручена!'); showEventBanner('🐕 Собака с тобой!'); addAchievement('dog','Лучший друг');
+  changeReputation(5);
+}
+
+// === ИСПРАВЛЕНО: кормление собаки по времени (кулдаун + проверка голода) ===
+function feedDog() {
+  if (!state.petDog) { log('🐕 Нет собаки'); return; }
+  if (invCount('food') < 1) { log('🐕 Нужна еда'); return; }
+  if (state.dogHunger >= 50) {
+    log('🐕 Собака не голодна');
+    showEventBanner('🐕 Собака сыта');
+    return;
+  }
+  const now = performance.now();
+  if (now - lastDogFeed < DOG_FEED_CD) {
+    const left = Math.ceil((DOG_FEED_CD - (now - lastDogFeed)) / 1000);
+    log(`🐕 Собака ещё не проголодалась (${left} с)`);
+    return;
+  }
+  invRemove('food', 1);
+  state.dogHunger = Math.min(100, state.dogHunger + 30);
+  lastDogFeed = now;
+  changeReputation(1);
+  log('🐕 Собака накормлена (+1 репутации)');
+  showEventBanner('🐕 +30 сытости');
+}
+
+function helpGrandma() {
+  if (grandmaEventActive) return;
+  grandmaEventActive = true;
+  const scene = game.scene.scenes[0]; if (!scene || !player) return;
+  const groundY = scene.scale.height - 20;
+  const g = scene.physics.add.sprite(player.x + 200, groundY - 24, 'npc_f').setDepth(15);
+  g.body.setSize(24, 48); g.body.setOffset(4, 8);
+  g.isGrandma = true; g.isNpc = true;
+  g.hp = 20; g.maxHp = 20;
+  scene.physics.add.collider(g, groundBody);
+  npcs.push(g);
+  showEventBanner('👵 Бабушка уронила сумку! Помоги (нажми 🔍)');
+  log('👵 Рядом бабушка. Подойди и помоги (кнопка 🔍)');
+}
+function completeGrandmaHelp(g) {
+  if (!g || !g.active) return;
+  changeReputation(5);
+  g.destroy();
+  npcs = npcs.filter(n => n.active);
+  log('👵 Ты помог бабушке (+5 репутации)');
+  showEventBanner('👵 +5 репутации');
+  grandmaEventActive = false;
+}
+
+// === ИСПРАВЛЕНО: бомж теперь сидит (bum_sit), рядом шапка/банка ===
+function spawnBeggar() {
+  if (beggarNpc && beggarNpc.active) return;
+  const scene = game.scene.scenes[0]; if (!scene || !player) return;
+  const groundY = scene.scale.height - 20;
+  const bx = player.x + (Math.random() * 800 - 400);
+  beggarNpc = scene.physics.add.sprite(bx, groundY - 14, 'bum_sit').setDepth(15);
+  beggarNpc.body.setSize(24, 28);
+  beggarNpc.body.setOffset(4, 28);
+  beggarNpc.isBeggar = true; beggarNpc.isNpc = true;
+  beggarNpc.hp = 10; beggarNpc.maxHp = 10;
+  beggarNpc.setTint(0x888888);
+  scene.physics.add.collider(beggarNpc, groundBody);
+  // шапка/банка для подаяния
+  beggarNpc.begCan = scene.add.sprite(bx + 18, groundY - 6, 'can').setDepth(14);
+  npcs.push(beggarNpc);
+  log('🧎 Бомж сидит на земле и просит милостыню.');
+}
+
+let activeQuest = null;
+const QUESTS = [
+  { id:'bottles', text:'Принеси 5 бутылок', check:()=>invCount('bottle')>=5, progress:()=>`${invCount('bottle')}/5`, reward:()=>{ invRemove('bottle',5); invAdd('coin',20); log('✅ Квест: +20 🪙'); } },
+  { id:'kills', text:'Убей 3 гопников', check:()=>currentKills>=3, progress:()=>`${currentKills}/3`, reward:()=>{ invAdd('shiv',1); currentKills=0; log('✅ Квест: +Заточка'); } },
+  { id:'metal', text:'Принеси 10 металла', check:()=>invCount('metal')>=10, progress:()=>`${invCount('metal')}/10`, reward:()=>{ invRemove('metal',10); invAdd('coin',50); log('✅ Квест: +50 🪙'); } },
+];
+function checkQuests() {
+  if (!activeQuest) { if (Math.random() < 0.001 && worldDay > 1) { activeQuest = QUESTS[Math.floor(Math.random()*QUESTS.length)]; if (activeQuest.id === 'kills') currentKills = 0; log(`📜 Квест: ${activeQuest.text}`); showEventBanner(`📜 ${activeQuest.text}`); updateQuestBox(); } return; }
+  if (activeQuest.check()) { activeQuest.reward(); activeQuest = null; showEventBanner('✅ Квест выполнен!'); updateQuestBox(); }
+  else { updateQuestBox(); }
+}
+function updateQuestBox() {
+  const box = document.getElementById('questBox');
+  if (!activeQuest) { box.style.display = 'none'; return; }
+  box.style.display = 'block';
+  box.textContent = `📜 ${activeQuest.text} (${activeQuest.progress()})`;
+}
+
+function clearDayNpcs(){
+  npcs = npcs.filter(n => {
+    if (!n.active) return false;
+    if (n.isNpc && !n.isAnimal && !n.isThug && !n.isBeggar && !n.isGrandma) {
+      if (n.hpBar) n.hpBar.destroy();
+      n.destroy();
+      return false;
+    }
+    if (n.isNpc && n.isThug && !n.isBoss && !n.isCop) {
+      if (n.hpBar) n.hpBar.destroy();
+      n.destroy();
+      return false;
+    }
+    return true;
+  });
+}
+function onPhaseChange(newPhase){
+  clearDayNpcs();
+  npcChunks.clear();
+  const pcx = Math.floor(player.x / CHUNK_W);
+  for (let i = pcx - 2; i <= pcx + 2; i++) generateChunk(i);
+  if (newPhase === 'night') log('🌙 Ночь. Появились гопники.');
+  else log('☀️ Светает. Появились прохожие.');
+}
+
+function updateTimeOfDay(delta){
+  worldTime += delta * 0.0017;
+  if(worldTime >= 24*60){ worldTime -= 24*60; worldDay++; }
+  const hours = Math.floor(worldTime/60), mins = Math.floor(worldTime%60);
+  const daysInMonth2027 = [31,28,31,30,31,30,31,31,30,31,30,31];
+  const FIRST_DAY_OFFSET = 4;
+  const dayOfYear = (worldDay - 1) % 365;
+  let monthIndex = 0, dayInMonth = dayOfYear + 1, accumulated = 0;
+  for (let i = 0; i < 12; i++) { if (dayInMonth <= accumulated + daysInMonth2027[i]) { monthIndex = i; dayInMonth = dayInMonth - accumulated; break; } accumulated += daysInMonth2027[i]; }
+  currentYear = 2027;
+  const dayOfWeekIndex = (FIRST_DAY_OFFSET + dayOfYear) % 7;
+  let season='winter';
+  if(monthIndex>=2&&monthIndex<=4) season='spring';
+  else if(monthIndex>=5&&monthIndex<=7) season='summer';
+  else if(monthIndex>=8&&monthIndex<=10) season='autumn';
+  let timeStr='', skyColor=0x5dade2;
+  if(hours>=6&&hours<12){ timeStr='Утро'; skyColor=0x87CEEB; }
+  else if(hours>=12&&hours<18){ timeStr='День'; skyColor=0x5dade2; }
+  else if(hours>=18&&hours<21){ timeStr='Вечер'; skyColor=0xffaa77; }
+  else { timeStr='Ночь'; skyColor=0x0a0a1a; }
+  if(currentWeather==='rain') skyColor = hours>=6&&hours<21 ? 0x4a6a8a : 0x050510;
+  if(currentWeather==='storm') skyColor = hours>=6&&hours<21 ? 0x304050 : 0x020208;
+  if(currentWeather==='snow') skyColor = hours>=6&&hours<21 ? 0xaad0e8 : 0x1a1a2a;
+  weatherTimer += delta;
+  if(weatherTimer>30000){ weatherTimer = 0; let r = Math.random();
+    if(season==='spring') currentWeather = r>0.6 ? 'rain' : 'clear';
+    else if(season==='summer') currentWeather = r>0.8 ? 'storm' : (r>0.5 ? 'rain' : 'clear');
+    else if(season==='autumn') currentWeather = r>0.8 ? 'storm' : (r>0.4 ? 'rain' : 'clear');
+    else currentWeather = r>0.7 ? 'snow' : 'clear'; }
+  if(currentWeather==='storm' && Math.random()<0.005) lightningAlpha = 0.8;
+  if(lightningAlpha > 0){ lightningAlpha -= delta*0.005; if(lightningAlpha < 0) lightningAlpha = 0; }
+  let icon = '☀️'; if(currentWeather==='rain') icon='🌧️'; if(currentWeather==='snow') icon='❄️'; if(currentWeather==='storm') icon='⛈️';
+  document.getElementById('timeText').textContent = `${String(hours).padStart(2,'0')}:${String(mins).padStart(2,'0')} (${timeStr})`;
+  document.getElementById('dayText').textContent = `${daysOfWeek[dayOfWeekIndex]}, ${dayInMonth} ${months[monthIndex]} ${currentYear}`;
+  document.getElementById('weatherText').textContent = `${icon} ${currentWeather==='clear'?'Ясно':currentWeather==='rain'?'Дождь':currentWeather==='snow'?'Снег':'Гроза'}`;
+  const scene = game.scene.scenes[0];
+  if(scene && scene.cameras && scene.cameras.main) scene.cameras.main.setBackgroundColor(skyColor);
+  const isNight = (hours>=21 || hours<6);
+  for (let i = litWindows.length - 1; i >= 0; i--) { const w = litWindows[i]; if (!w.active) { litWindows.splice(i,1); continue; } const target = isNight ? (w.isLit ? w.litColor : w.baseColor) : w.baseColor; if (w.fillColor !== target) w.setFillStyle(target); }
+  // ИСПРАВЛЕНО: сначала событие дня, потом бабушка (без затирания флага)
+  if (worldDay !== lastEventDay) {
+    lastEventDay = worldDay;
+    triggerRandomEvent();
+    if (Math.random() < 0.3) helpGrandma();
+  }
+  const newPhase = getTodPhase();
+  if(newPhase !== lastPhase){ lastPhase = newPhase; onPhaseChange(newPhase); }
+}
+function updateWeatherParticles(delta){
+  if(!weatherLayer) return;
+  weatherLayer.clear();
+  const W = game.scene.scenes[0].scale.width, H = game.scene.scenes[0].scale.height;
+  if(lightningAlpha > 0){ weatherLayer.fillStyle(0xffffff, lightningAlpha); weatherLayer.fillRect(0,0,W,H); }
+  if(currentWeather==='rain'||currentWeather==='storm'){ for(let i=0;i<5;i++) if(weatherParticles.length<200) weatherParticles.push({x:Math.random()*W,y:-10,vx:-0.5,vy:10+Math.random()*5,type:'rain',size:1+Math.random()*1.5,life:2000}); }
+  else if(currentWeather==='snow'){ for(let i=0;i<3;i++) if(weatherParticles.length<150) weatherParticles.push({x:Math.random()*W,y:-10,vx:(Math.random()-0.5)*0.8,vy:1.5+Math.random()*1.5,type:'snow',size:1.5+Math.random()*2,life:10000,wobble:Math.random()*Math.PI*2}); }
+  for(let i=weatherParticles.length-1;i>=0;i--){ const p = weatherParticles[i]; p.x += p.vx; p.y += p.vy; p.life -= delta;
+    if(p.type==='snow'){ p.wobble += 0.02; p.x += Math.sin(p.wobble)*0.4; }
+    if(p.y>H+20||p.life<=0){ weatherParticles.splice(i,1); continue; }
+    if(p.type==='rain'){ weatherLayer.fillStyle(0xaaddff,0.7); weatherLayer.fillRect(p.x,p.y,p.size,10); }
+    else if(p.type==='snow'){ weatherLayer.fillStyle(0xffffff,0.9); weatherLayer.fillCircle(p.x,p.y,p.size); } }
+}
+function startHide(){
+  if(isHiding) return; isHiding = true;
+  document.getElementById('hideText').textContent = 'Ты прячешься...';
+  document.getElementById('hideSub').textContent = 'Засыпаешь до утра!';
+  document.getElementById('hideOverlay').style.display='flex';
+  worldTime = 6*60; worldDay++; state.hp = Math.min(state.maxHp, state.hp + 20);
+  log('💤 Поспал в мешках: +20 HP'); updateRecords();
+  setTimeout(()=>{ isHiding = false; document.getElementById('hideOverlay').style.display='none'; log('Ночь прошла.'); }, 3000);
+}
+function sleepInHome(){
+  if(isSitting) standUp(); isHiding = true;
+  document.getElementById('hideText').textContent = 'Спишь в укрытии...';
+  document.getElementById('hideSub').textContent = 'Хороший сон восстанавливает силы';
+  document.getElementById('hideOverlay').style.display='flex';
+  worldTime = 7*60; worldDay++; state.hp = Math.min(state.maxHp, state.hp + 50);
+  state.hunger = Math.max(0, state.hunger - 20); state.water = Math.max(0, state.water - 20);
+  log('😴 Выспался: +50 HP, -20 еда/вода'); updateRecords();
+  setTimeout(()=>{ isHiding = false; document.getElementById('hideOverlay').style.display='none'; log('Утро. Пора вставать.'); }, 3000);
+}
+const ctxBtn = document.getElementById('ctxBtn'), ctxBtnHide = document.getElementById('ctxBtnHide'), btnSit = document.getElementById('btnSit');
+const btnDog = document.getElementById('btnDog');
+
+function doPickup(){ game.scene.scenes[0].children.list.forEach(child=>{ if(child.isPickup && Phaser.Math.Distance.Between(player.x,player.y,child.x,child.y)<80){ const added = invAdd(child.itemId,1); if(added>0){ log(`Подобрано: ${ITEMS[child.itemId].icon} ${ITEMS[child.itemId].name}`); child.destroy(); } } }); }
+function stealFromNPC(npc) {
+  if (!npc || !npc.active || npc.isBeggar) return;
+  const chance = 0.5 + state.reputation * 0.002;
+  if (Math.random() < chance) {
+    const loot = ['coin','coin','bottle','rag','food'];
+    const item = loot[Math.floor(Math.random()*loot.length)];
+    invAdd(item, 1); log(`🤏 Украл: ${ITEMS[item].icon} ${ITEMS[item].name}`); changeReputation(-5);
+  } else { log('❌ Кража не удалась!'); if (!npc.isBoss) npc.setTexture(npc.isFemale?'npc_thug_f':'npc_thug_m'); npc.isThug = true; changeReputation(-10); }
+}
+function interact(){
+  if(!currentCtxTarget) return;
+  if(currentCtxTarget.isTrash){
+    if(currentCtxTarget.looted){ log('Уже пусто.'); return; }
+    if(isHiding) return;
+    currentCtxTarget.looted = true; currentCtxTarget.destroy();
+    const loot=['bottle','bottle','bottle','bottle','bottle','rag','rag','metal','metal','board','nail','tape','coin','coin','water_bottle','food','plastic','glass','wire','rozochka','pipe','shiv','cap','cardboard'];
+    let count=2+Math.floor(Math.random()*4), found=[];
+    for(let i=0;i<count;i++){ let item=loot[Math.floor(Math.random()*loot.length)]; if(invAdd(item,1)>0) found.push(`${ITEMS[item].icon}${ITEMS[item].name}`); }
+    if (Math.random() < 0.02) { const rare = ['katana','armor_plate','leather_jacket'][Math.floor(Math.random()*3)]; if(invAdd(rare,1)>0){ found.push(`⭐${ITEMS[rare].name}`); log(`⭐ РЕДКАЯ НАХОДКА: ${ITEMS[rare].name}`); showEventBanner(`⭐ ${ITEMS[rare].name}`); addAchievement('lucky','Везунчик'); } }
+    if(found.length) log(`Порылся: ${found.join(', ')}`);
+    changeReputation(1);
+  } else if(currentCtxTarget.isBuilding){
+    if (currentCtxTarget.buildType === 'bank') openShop('bank');
+    else if (currentCtxTarget.buildType === 'entrance') openStash();
+    else openShop(currentCtxTarget.buildType);
+  } else if(currentCtxTarget.isHome){ sleepInHome(); }
+  else if(currentCtxTarget._isBeggar){ giveAlms(); }
+  else if(currentCtxTarget._isGrandma){ completeGrandmaHelp(currentCtxTarget); }
+  else if(currentCtxTarget._isSteal){ stealFromNPC(currentCtxTarget); }
+}
+function giveAlms() {
+  if (invCount('coin') < 5) { log('🧎 Нужно 5 монет для милостыни'); return; }
+  invRemove('coin', 5);
+  changeReputation(3);
+  log('🧎 Дал милостыню бомжу (+3 репутации)');
+  showEventBanner('🧎 +3 репутации');
+  // ИСПРАВЛЕНО: чистим и банку, и спрайт
+  if (beggarNpc) {
+    if (beggarNpc.begCan) beggarNpc.begCan.destroy();
+    beggarNpc.destroy();
+    beggarNpc = null;
+  }
+}
+function sitDown(){ if(isSitting) return; isSitting=true; btnSit.style.display='none'; player.anims.stop(); player.setTexture('bum_sit'); player.body.setVelocityX(0); const groundY = game.scene.scenes[0].scale.height - 20; player.y = groundY - 24; sittingCan = game.scene.scenes[0].add.sprite(player.x+20, groundY-8, 'can').setDepth(5); log('Сел просить...'); document.getElementById('btnAttack').style.display='none'; }
+function standUp(){ if(!isSitting) return; isSitting=false; player.setTexture('bum_idle'); if(sittingCan){ sittingCan.destroy(); sittingCan=null; } document.getElementById('btnAttack').style.display='flex'; log('Встал.'); }
+btnSit.onclick = ()=>{ if(isSitting) standUp(); else sitDown(); };
+
+// === НОВОЕ: кнопка собаки (отдельная) ===
+btnDog.onclick = () => {
+  if (!player) return;
+  if (!state.petDog) {
+    // приручение — если рядом бездомная
+    const near = npcs.find(n => n.active && n.isAnimal && n.texture.key === 'npc_dog' &&
+      Phaser.Math.Distance.Between(player.x, player.y, n.x, n.y) < 100);
+    if (near) { adoptDog(); return; }
+    log('🐕 Рядом нет собаки');
+    showEventBanner('🐕 Рядом нет собаки');
+    return;
+  }
+  feedDog();
+};
+function updateDogButton() {
+  if (!btnDog) return;
+  if (!player) return;
+  if (state.petDog) {
+    btnDog.style.display = 'flex';
+    btnDog.textContent = '🐕';
+    const hungry = state.dogHunger < 50;
+    const cdReady = performance.now() - lastDogFeed > DOG_FEED_CD;
+    const hasFood = invCount('food') > 0;
+    btnDog.disabled = !(hungry && cdReady && hasFood);
+    btnDog.classList.toggle('feed', hungry && cdReady && hasFood);
+  } else {
+    const nearDog = npcs.some(n => n.active && n.isAnimal && n.texture.key === 'npc_dog' &&
+      Phaser.Math.Distance.Between(player.x, player.y, n.x, n.y) < 100);
+    btnDog.style.display = nearDog ? 'flex' : 'none';
+    btnDog.textContent = '🐾';
+    btnDog.disabled = false;
+    btnDog.classList.remove('feed');
+  }
+}
+
+function updateCtxUI(){
+  if (!player) return;
+  let closest=null, minDist=100;
+  trashBags.forEach(bag=>{ if(!bag.active) return; let d=Phaser.Math.Distance.Between(player.x,player.y,bag.x,bag.y); if(d<minDist){ minDist=d; closest={obj:bag,isTrash:true}; } });
+  buildings.forEach(b=>{ if(!b.active) return; let d=Phaser.Math.Distance.Between(player.x,player.y,b.x,b.y); if(d<minDist){ minDist=d; closest={obj:b,isBuilding:true}; } });
+  if (traderNpc && traderNpc.active) { let d = Phaser.Math.Distance.Between(player.x, player.y, traderNpc.x, traderNpc.y); if (d < minDist) { minDist = d; closest = { obj: traderNpc, isTrader: true }; } }
+  if (beggarNpc && beggarNpc.active) { let d = Phaser.Math.Distance.Between(player.x, player.y, beggarNpc.x, beggarNpc.y); if (d < minDist) { minDist = d; closest = { obj: beggarNpc, isBeggar: true }; } }
+  // УБРАНО: ветки _isDog/_isDogFeed из общей кнопки — теперь за это отвечает btnDog
+  npcs.forEach(npc => {
+    if (!npc.active) return;
+    if (npc.isGrandma) {
+      let d = Phaser.Math.Distance.Between(player.x, player.y, npc.x, npc.y);
+      if (d < minDist) { minDist = d; closest = { obj: npc, isGrandma: true }; }
+      return;
+    }
+    if (npc.isAnimal || npc.isThug || npc.isBoss) return;
+    let d = Phaser.Math.Distance.Between(player.x, player.y, npc.x, npc.y);
+    if (d < minDist) { minDist = d; closest = { obj: npc, isSteal: true }; }
+  });
+  if (currentCtxTarget) { currentCtxTarget._isDog = false; currentCtxTarget._isSteal = false; currentCtxTarget._isBeggar = false; currentCtxTarget._isGrandma = false; currentCtxTarget._isDogFeed = false; }
+  currentCtxTarget = closest ? closest.obj : null;
+  if (currentCtxTarget && closest) { currentCtxTarget._isDog = closest.isDog || false; currentCtxTarget._isSteal = closest.isSteal || false; currentCtxTarget._isBeggar = closest.isBeggar || false; currentCtxTarget._isGrandma = closest.isGrandma || false; currentCtxTarget._isDogFeed = closest.isDogFeed || false; }
+  if(isSitting){ ctxBtn.style.display='none'; ctxBtnHide.style.display='none'; btnSit.style.display='flex'; btnSit.textContent='🚶'; }
+  else {
+    btnSit.style.display='flex'; btnSit.textContent='🪑';
+    if(currentCtxTarget){
+      ctxBtn.style.display='flex';
+      if (!ctxBtn._bound) { ctxBtn._bound = true; ctxBtn.onclick = () => {
+        if (!currentCtxTarget) return;
+        if (currentCtxTarget.isTrash) interact();
+        else if (currentCtxTarget.isTrader) openShop('trader');
+        else if (currentCtxTarget._isBeggar) giveAlms();
+        else if (currentCtxTarget._isGrandma) completeGrandmaHelp(currentCtxTarget);
+        else if (currentCtxTarget._isSteal) stealFromNPC(currentCtxTarget);
+        else interact();
+      }; }
+      if(currentCtxTarget.isTrash){ ctxBtnHide.style.display='flex'; ctxBtnHide.onclick=startHide; }
+      else { ctxBtnHide.style.display='none'; }
+    } else { ctxBtn.style.display='none'; ctxBtnHide.style.display='none'; }
+  }
+  // обновляем кнопку собаки
+  updateDogButton();
+}
+
+function tickFoodAges() {
+  if (!state.foodAgeStart) return;
+  if (!state.inv.food || state.inv.food <= 0) { state.foodAgeStart = null; return; }
+  const startTotalHours = (state.foodAgeStart.day - 1) * 24 + (state.foodAgeStart.time / 60);
+  const nowTotalHours = (worldDay - 1) * 24 + (worldTime / 60);
+  let elapsed = nowTotalHours - startTotalHours; if (elapsed < 0) elapsed = 0;
+  if (elapsed >= 36) { const count = state.inv.food; invRemove('food', count); state.foodAgeStart = null; log(`🍞 Еда протухла (${count} шт.) — прошло 36 часов`); showEventBanner('🍞 Еда протухла!'); }
+}
+function applyWeatherEffects(delta) {
+  if (currentWeather === 'snow') state.hunger = Math.max(0, state.hunger - delta * 0.00002);
+  else if (currentWeather === 'rain') state.water = Math.max(0, state.water - delta * 0.00002);
+  else if (currentWeather === 'storm') { if (Math.random() < 0.0001) { state.hp = Math.max(0, state.hp - 15); log('⚡ Молния! -15 HP'); showEventBanner('⚡ -15 ❤️'); } }
+}
+let lastWarnHunger = false, lastWarnWater = false;
+function checkWarnings() {
+  if (state.hunger < 20 && !lastWarnHunger) { lastWarnHunger = true; log('⚠️ Ты голоден!'); showEventBanner('⚠️ Голод!'); } if (state.hunger > 30) lastWarnHunger = false;
+  if (state.water < 20 && !lastWarnWater) { lastWarnWater = true; log('⚠️ Ты хочешь пить!'); showEventBanner('⚠️ Жажда!'); } if (state.water > 30) lastWarnWater = false;
+  const monthIndex = Math.floor(((worldDay - 1) % 365) / 30); const isWinter = monthIndex >= 11 || monthIndex <= 1;
+  if (isWinter && !state.equip.body && !lastWarnCold) { lastWarnCold = true; log('🥶 Холодно! Надень куртку'); showEventBanner('🥶 Холодно без куртки!'); }
+  if (!isWinter || state.equip.body) lastWarnCold = false;
+}
+function spawnTrader() {
+  if (!groundBody) return;
+  if (traderNpc && traderNpc.active) { if (Math.abs(Math.floor(traderNpc.x / CHUNK_W) - Math.floor(player.x / CHUNK_W)) > 4) { traderNpc.destroy(); traderNpc = null; } else { return; } }
+  const scene = game.scene.scenes[0]; const groundY = scene.scale.height - 20;
+  let attempts = 0;
+  do { traderX = player.x + (Math.random()*800 - 400); attempts++; } while (attempts < 10 && (buildings.some(b => b.active && Math.abs(b.x - traderX) < 60) || trashBags.some(t => t.active && Math.abs(t.x - traderX) < 40)));
+  traderNpc = scene.physics.add.sprite(traderX, groundY - 24, 'npc_trader').setDepth(15);
+  traderNpc.body.setSize(24, 48); traderNpc.body.setOffset(4, 8);
+  traderNpc.isTrader = true; traderNpc.dir = -1; traderNpc.isFemale = false; traderNpc.hp = 100; traderNpc.maxHp = 100; traderNpc.isThug = false; traderNpc.isNpc = true;
+  scene.physics.add.collider(traderNpc, groundBody); log('🧔 Появился барыга!');
+}
+function checkPolice() { if (currentKills >= 10 && !state.achievements.includes('wanted')) { addAchievement('wanted','В розыске'); log('🚔 ПОЛИЦИЯ ИЩЕТ ТЕБЯ!'); showEventBanner('🚔 Полиция в розыске!'); state.hp = Math.max(1, state.hp - 30); const fine = Math.min(invCount('coin'), 100); if (fine > 0) { invRemove('coin', fine); log(`💸 Штраф: -${fine} 🪙`); } } }
+function applySeasonEffects() { const monthIndex = Math.floor(((worldDay - 1) % 365) / 30); if (monthIndex >= 11 || monthIndex <= 1) { if (!state.equip.body) { state.hp = Math.max(0, state.hp - 0.002); } } }
+function checkAchievements() { if (worldDay >= 30) addAchievement('survive30','Прожил 30 дней'); if (invCount('coin') >= 1000) addAchievement('rich','Богач'); if (records.kills >= 100) addAchievement('killer','Убийца 100 гопников'); if (businessLevel >= 5) addAchievement('biz5','Бизнесмен'); if (state.equip.weapon === 'katana') addAchievement('katana','Обладатель катаны'); }
+function checkWin() { if (invCount('coin') >= 10000 && !state.achievements.includes('win')) { addAchievement('win','Купил квартиру!'); showEventBanner('🏆 ПОБЕДА! Ты купил квартиру!'); log('🏆 ФИНАЛ: Ты купил квартиру!'); } }
+
+const config = { type:Phaser.CANVAS, parent:'game', width:W0, height:H0, backgroundColor:'#5dade2', pixelArt:true,
+  scale:{ mode:Phaser.Scale.FIT, autoCenter:Phaser.Scale.CENTER_BOTH, width:W0, height:H0 },
+  physics:{ default:'arcade', arcade:{ gravity:{y:1200}, debug:false } }, 
+  input: { touch: false }, 
+  scene:{ preload, create, update } };
+
+if(!loadGame()){ initStarterInventory(); }
+else { syncInv(); }
 const game = new Phaser.Game(config);
 
-// ============ ТЕКСТУРЫ ============
 function createTextures(scene){
   const px=4;
   const make=(key,w,h,fn)=>{ if(scene.textures.exists(key)) return; const canvas=document.createElement('canvas'); canvas.width=w*px; canvas.height=h*px; const ctx=canvas.getContext('2d'); ctx.imageSmoothingEnabled=false; fn(ctx,px); scene.textures.addCanvas(key,canvas); };
   const R=(ctx,color,x,y,w,h,p)=>{ ctx.fillStyle=color; ctx.fillRect(x*p,y*p,w*p,h*p); };
   const drawBum=(c,p,isWalk,step,isSit)=>{
     if(isSit){ R(c,'#2a2a2a',0,10,6,2,p); R(c,'#111111',0,12,2,2,p); R(c,'#111111',4,12,2,2,p); R(c,'#5a3a2a',0,5,6,5,p); R(c,'#f0c0a0',0,7,1,2,p); R(c,'#f0c0a0',5,7,1,2,p); R(c,'#f0c0a0',1,2,4,3,p); R(c,'#222222',1,1,4,1,p); R(c,'#000000',2,3,1,1,p); R(c,'#000000',4,3,1,1,p); }
-    else { R(c,'#2a2a2a',0,10,6,2,p);
-      if(!isWalk){ R(c,'#111111',0,12,2,2,p); R(c,'#111111',4,12,2,2,p); }
-      else if(step===1){ R(c,'#2a2a2a',0,10,2,3,p); R(c,'#111111',0,13,2,1,p); R(c,'#2a2a2a',4,10,2,2,p); R(c,'#111111',4,12,2,1,p); }
-      else { R(c,'#2a2a2a',0,10,2,2,p); R(c,'#111111',0,12,2,1,p); R(c,'#2a2a2a',4,10,2,3,p); R(c,'#111111',4,13,2,1,p); }
-      R(c,'#5a3a2a',0,4,6,6,p); R(c,'rgba(0,0,0,0.2)',2,4,2,6,p); R(c,'#f0c0a0',0,6,1,2,p); R(c,'#f0c0a0',5,6,1,2,p); R(c,'#f0c0a0',1,1,4,3,p); R(c,'#222222',1,0,4,1,p); R(c,'#000000',2,2,1,1,p); R(c,'#000000',4,2,1,1,p); }
-  };
+    else { R(c,'#2a2a2a',0,10,6,2,p); if(!isWalk){ R(c,'#111111',0,12,2,2,p); R(c,'#111111',4,12,2,2,p); } else if(step===1){ R(c,'#2a2a2a',0,10,2,3,p); R(c,'#111111',0,13,2,1,p); R(c,'#2a2a2a',4,10,2,2,p); R(c,'#111111',4,12,2,1,p); } else { R(c,'#2a2a2a',0,10,2,2,p); R(c,'#111111',0,12,2,1,p); R(c,'#2a2a2a',4,10,2,3,p); R(c,'#111111',4,13,2,1,p); } R(c,'#5a3a2a',0,4,6,6,p); R(c,'rgba(0,0,0,0.2)',2,4,2,6,p); R(c,'#f0c0a0',0,6,1,2,p); R(c,'#f0c0a0',5,6,1,2,p); R(c,'#f0c0a0',1,1,4,3,p); R(c,'#222222',1,0,4,1,p); R(c,'#000000',2,2,1,1,p); R(c,'#000000',4,2,1,1,p); } };
   make('bum_idle',8,14,(c,p)=>drawBum(c,p,false,0,false)); make('bum_walk1',8,14,(c,p)=>drawBum(c,p,true,1,false)); make('bum_walk2',8,14,(c,p)=>drawBum(c,p,true,2,false)); make('bum_sit',8,14,(c,p)=>drawBum(c,p,false,0,true));
   make('npc_m',8,14,(c,p)=>{ R(c,'#222222',0,10,6,2,p); R(c,'#111111',0,12,2,2,p); R(c,'#111111',4,12,2,2,p); R(c,'#445566',0,4,6,6,p); R(c,'#f0c0a0',0,6,1,2,p); R(c,'#f0c0a0',5,6,1,2,p); R(c,'#d0a090',1,1,4,3,p); R(c,'#444444',1,0,4,1,p); R(c,'#000000',2,2,1,1,p); R(c,'#000000',4,2,1,1,p); });
   make('npc_m1',8,14,(c,p)=>{ R(c,'#222222',0,10,2,3,p); R(c,'#111111',0,13,2,1,p); R(c,'#222222',4,10,2,2,p); R(c,'#111111',4,12,2,1,p); R(c,'#445566',0,4,6,6,p); R(c,'#f0c0a0',0,6,1,2,p); R(c,'#f0c0a0',5,6,1,2,p); R(c,'#d0a090',1,1,4,3,p); R(c,'#444444',1,0,4,1,p); R(c,'#000000',2,2,1,1,p); R(c,'#000000',4,2,1,1,p); });
@@ -554,6 +1271,10 @@ function createTextures(scene){
   make('npc_f2',8,14,(c,p)=>{ R(c,'#a04060',0,10,2,3,p); R(c,'#f0c0a0',0,13,2,1,p); R(c,'#a04060',4,10,2,4,p); R(c,'#f0c0a0',4,14,2,1,p); R(c,'#a04060',0,4,6,6,p); R(c,'#f0c0a0',0,6,1,2,p); R(c,'#f0c0a0',5,6,1,2,p); R(c,'#f0c0a0',1,1,4,3,p); R(c,'#aa6633',1,0,4,2,p); R(c,'#000000',2,2,1,1,p); R(c,'#000000',4,2,1,1,p); });
   make('npc_thug_m',8,14,(c,p)=>{ R(c,'#1a1a1a',0,10,6,2,p); R(c,'#1a1a1a',0,12,2,2,p); R(c,'#1a1a1a',4,12,2,2,p); R(c,'#222222',0,4,6,6,p); R(c,'#d0a090',0,6,1,2,p); R(c,'#d0a090',5,6,1,2,p); R(c,'#d0a090',1,1,4,3,p); R(c,'#111111',0,0,6,2,p); R(c,'#000000',2,2,1,1,p); R(c,'#000000',4,2,1,1,p); });
   make('npc_thug_f',8,14,(c,p)=>{ R(c,'#1a1a1a',0,10,6,2,p); R(c,'#1a1a1a',0,12,2,2,p); R(c,'#1a1a1a',4,12,2,2,p); R(c,'#222222',0,4,6,6,p); R(c,'#d0a090',0,6,1,2,p); R(c,'#d0a090',5,6,1,2,p); R(c,'#d0a090',1,1,4,3,p); R(c,'#881111',1,0,4,1,p); R(c,'#000000',2,2,1,1,p); R(c,'#000000',4,2,1,1,p); });
+  make('npc_trader',8,14,(c,p)=>{ R(c,'#222222',0,10,6,2,p); R(c,'#111111',0,12,2,2,p); R(c,'#111111',4,12,2,2,p); R(c,'#7a3a8a',0,4,6,6,p); R(c,'#5a2a6a',2,4,2,6,p); R(c,'#e8b860',1,6,4,1,p); R(c,'#d0a090',0,6,1,2,p); R(c,'#d0a090',5,6,1,2,p); R(c,'#d0a090',1,1,4,3,p); R(c,'#2a1a3a',0,0,6,2,p); R(c,'#1a0a2a',1,1,4,1,p); R(c,'#000000',2,2,1,1,p); R(c,'#000000',4,2,1,1,p); });
+  make('npc_trader1',8,14,(c,p)=>{ R(c,'#222222',0,10,2,3,p); R(c,'#111111',0,13,2,1,p); R(c,'#222222',4,10,2,2,p); R(c,'#111111',4,12,2,1,p); R(c,'#7a3a8a',0,4,6,6,p); R(c,'#5a2a6a',2,4,2,6,p); R(c,'#e8b860',1,6,4,1,p); R(c,'#d0a090',0,6,1,2,p); R(c,'#d0a090',5,6,1,2,p); R(c,'#d0a090',1,1,4,3,p); R(c,'#2a1a3a',0,0,6,2,p); R(c,'#1a0a2a',1,1,4,1,p); R(c,'#000000',2,2,1,1,p); R(c,'#000000',4,2,1,1,p); });
+  make('npc_trader2',8,14,(c,p)=>{ R(c,'#222222',0,10,2,2,p); R(c,'#111111',0,12,2,1,p); R(c,'#222222',4,10,2,3,p); R(c,'#111111',4,13,2,1,p); R(c,'#7a3a8a',0,4,6,6,p); R(c,'#5a2a6a',2,4,2,6,p); R(c,'#e8b860',1,6,4,1,p); R(c,'#d0a090',0,6,1,2,p); R(c,'#d0a090',5,6,1,2,p); R(c,'#d0a090',1,1,4,3,p); R(c,'#2a1a3a',0,0,6,2,p); R(c,'#1a0a2a',1,1,4,1,p); R(c,'#000000',2,2,1,1,p); R(c,'#000000',4,2,1,1,p); });
+  make('npc_cop',8,14,(c,p)=>{ R(c,'#1a1a2a',0,10,6,2,p); R(c,'#111111',0,12,2,2,p); R(c,'#111111',4,12,2,2,p); R(c,'#2255cc',0,4,6,6,p); R(c,'#1a44aa',2,4,2,6,p); R(c,'#e8b860',1,6,4,1,p); R(c,'#f0c0a0',0,6,1,2,p); R(c,'#f0c0a0',5,6,1,2,p); R(c,'#f0c0a0',1,1,4,3,p); R(c,'#1a2a5a',0,0,6,2,p); R(c,'#0a1a3a',1,1,4,1,p); R(c,'#000000',2,2,1,1,p); R(c,'#000000',4,2,1,1,p); });
   make('npc_dog',10,8,(c,p)=>{ R(c,'#8b4513',0,2,8,4,p); R(c,'#5a2a08',0,5,2,2,p); R(c,'#5a2a08',7,5,2,2,p); R(c,'#8b4513',8,0,2,3,p); R(c,'#000000',7,1,1,1,p); });
   make('npc_rat',6,4,(c,p)=>{ R(c,'#555555',0,1,4,2,p); R(c,'#666666',4,0,2,3,p); R(c,'#aa4444',1,1,1,1,p); });
   make('npc_boss',12,18,(c,p)=>{ R(c,'#1a1a1a',0,12,10,4,p); R(c,'#111111',0,16,4,2,p); R(c,'#111111',6,16,4,2,p); R(c,'#331111',0,4,10,8,p); R(c,'#d0a090',0,8,2,3,p); R(c,'#d0a090',8,8,2,3,p); R(c,'#c0a090',2,1,6,4,p); R(c,'#222222',1,0,8,2,p); R(c,'#ff0000',3,2,2,1,p); R(c,'#ff0000',6,2,2,1,p); });
@@ -576,11 +1297,19 @@ function createTextures(scene){
   make('w_pipe',2,6,(c,p)=>{ R(c,'#666666',0,0,2,6,p); });
   make('w_axe',6,6,(c,p)=>{ R(c,'#5a3a2a',0,0,2,6,p); R(c,'#888888',2,0,4,3,p); });
   make('w_crowbar',2,8,(c,p)=>{ R(c,'#c060c0',0,0,2,8,p); });
-  // ПАТЧ: недостающие текстуры
   make('w_hammer',6,8,(c,p)=>{ R(c,'#5a3a2a',1,2,2,6,p); R(c,'#888888',0,0,4,3,p); });
   make('w_katana',2,10,(c,p)=>{ R(c,'#dddddd',0,0,2,8,p); R(c,'#5a3a2a',0,8,2,2,p); R(c,'#aa4444',0,6,2,1,p); });
+  make('home',15,20,(c,p)=>{ R(c,'#3a2a1a',0,6,15,14,p); R(c,'#5a3a2a',0,0,15,7,p); R(c,'#222222',3,10,4,10,p); R(c,'#ffcc55',10,10,3,3,p); });
 }
 function preload(){ createTextures(this); }
+
+function isPositionFree(x, minDist) {
+  for (const b of buildings) { if (b.active && Math.abs(b.x - x) < minDist) return false; }
+  for (const t of trashBags) { if (t.active && Math.abs(t.x - x) < minDist) return false; }
+  if (traderNpc && traderNpc.active && Math.abs(traderNpc.x - x) < minDist) return false;
+  if (petDogSprite && petDogSprite.active && Math.abs(petDogSprite.x - x) < minDist) return false;
+  return true;
+}
 
 function create(){
   const W=this.scale.width, H=this.scale.height;
@@ -588,23 +1317,19 @@ function create(){
   const groundY = H - 20;
   groundBody = this.add.rectangle(-500000, groundY, 1000000, 40, 0x2a3a2a).setOrigin(0,0).setDepth(1);
   this.physics.add.existing(groundBody, true);
-  groundBody.body.setSize(1000000, 40);
-  groundBody.body.updateFromGameObject();
+  groundBody.body.setSize(1000000, 40); groundBody.body.updateFromGameObject();
   this.add.rectangle(-500000, H-10, 1000000, 20, 0x555555).setOrigin(0,0).setDepth(2);
-
   this.anims.create({ key:'bum_walk_anim', frames:[{key:'bum_walk1'},{key:'bum_walk2'}], frameRate:8, repeat:-1 });
   this.anims.create({ key:'civ_m_walk', frames:[{key:'npc_m1'},{key:'npc_m2'}], frameRate:6, repeat:-1 });
   this.anims.create({ key:'civ_f_walk', frames:[{key:'npc_f1'},{key:'npc_f2'}], frameRate:6, repeat:-1 });
-
+  this.anims.create({ key:'trader_walk', frames:[{key:'npc_trader1'},{key:'npc_trader2'}], frameRate:6, repeat:-1 });
   player = this.physics.add.sprite(0, groundY - 48, 'bum_idle').setDepth(10);
   player.body.setSize(24, 48); player.body.setOffset(4, 8);
   player.setCollideWorldBounds(false);
   this.physics.add.collider(player, groundBody);
   this.cameras.main.startFollow(player, true, 0.1, 0.1);
-
   weaponSprite = this.add.sprite(player.x, player.y, 'w_bottle').setDepth(11).setVisible(false);
-  weatherLayer = this.add.graphics(); weatherLayer.setDepth(50); weatherLayer.setScrollFactor(0);
-
+  weatherLayer = this.add.graphics(); weatherLayer.setDepth(10.5); weatherLayer.setScrollFactor(0);
   lastPhase = getTodPhase();
   const NPC_Y = groundY - 24;
   for (let i = 0; i < 6; i++) {
@@ -614,21 +1339,24 @@ function create(){
     npc.body.setSize(24, 48); npc.body.setOffset(4, 8);
     npc.isThug = false; npc.isNpc = true; npc.hp = 20; npc.maxHp = 20;
     npc.didDrop = false; npc.dir = i%3===0?1:-1; npc.isFemale = isFemale;
-    npc.setDepth(15);
-    this.physics.add.collider(npc, groundBody);
-    npcs.push(npc);
+    npc.setDepth(15); this.physics.add.collider(npc, groundBody); npcs.push(npc);
   }
   log('Старт. NPC: ' + npcs.length);
-
-  // ПАТЧ: чанки вокруг сохранённой позиции
   if (window.__savedX !== undefined && window.__savedX !== 0) {
     player.x = window.__savedX;
     const savedChunk = Math.floor(player.x / CHUNK_W);
     for (let i = savedChunk - 2; i <= savedChunk + 2; i++) generateChunk(i);
-  } else {
-    for (let i = -2; i <= 2; i++) generateChunk(i);
-  }
+  } else { for (let i = -2; i <= 2; i++) generateChunk(i); }
   renderUI();
+  if (state.petDog) {
+    document.getElementById('dogIndicator').style.display = 'flex';
+    if (!petDogSprite || !petDogSprite.active) {
+      petDogSprite = this.physics.add.sprite(player.x - 40, player.y - 20, 'npc_dog').setDepth(12);
+      petDogSprite.body.setSize(40, 32); petDogSprite.body.setAllowGravity(true);
+      this.physics.add.collider(petDogSprite, groundBody);
+    }
+  }
+  if (state.equip.weapon) updateSprite();
   saveGame();
 }
 
@@ -640,44 +1368,68 @@ function generateChunk(idx){
   const groundY = H - 20;
   const NPC_Y = groundY - 24;
   const objs = [];
-
   for(let i=0; i<2; i++){
     let h = 200 + Math.random()*150, w = 120 + Math.random()*80;
     let x = startX + i*(CHUNK_W/2) + 40;
     objs.push(scene.add.rectangle(x+w/2, groundY, w, h, 0x151820).setOrigin(0.5,1).setDepth(-20));
     objs.push(scene.add.triangle(x+w/2, groundY-h, 0,40, w/2+10,0, w+20,40, 0x0d1015).setOrigin(0.5,1).setDepth(-20));
-    for(let wy = groundY-40; wy > groundY-h; wy -= 40){
-      for(let wx = x+20; wx < x+w-20; wx += 30){
-        let isLit = Math.random() > 0.4;
-        let win = scene.add.rectangle(wx, wy, 16, 20, 0x111111).setDepth(-15);
-        win.isWindow = true; win.isLit = isLit; win.baseColor = 0x111111; win.litColor = 0xffcc55;
-        objs.push(win);
-        litWindows.push(win); // ПАТЧ: отдельный массив окон
-      }
-    }
+    for(let wy = groundY-40; wy > groundY-h; wy -= 40){ for(let wx = x+20; wx < x+w-20; wx += 30){
+      let isLit = Math.random() > 0.4;
+      let win = scene.add.rectangle(wx, wy, 16, 20, 0x111111).setDepth(-15);
+      win.isWindow = true; win.isLit = isLit; win.baseColor = 0x111111; win.litColor = 0xffcc55;
+      objs.push(win); litWindows.push(win);
+    } }
   }
-  if(Math.random() > 0.6){
+  if(Math.random() > 0.4){
     let type='shop', r=Math.random();
     if(r>0.5) type = r>0.8 ? 'metal' : (r>0.65 ? 'bottles' : 'trash');
     else if(r<0.2) type = 'business';
+    else if(r<0.3) type = 'bank';
     let tex='shop', lbl='🏪 МАГАЗИН', col='#ffcc00';
     if(type==='metal'){tex='recycle_metal';lbl='⚙️ МЕТАЛЛ';col='#aaa';}
     if(type==='bottles'){tex='recycle_bottle';lbl='🍾 БУТЫЛКИ';col='#4a4';}
     if(type==='trash'){tex='recycle_trash';lbl='🗑️ МУСОР';col='#a4a';}
     if(type==='business'){tex='shop';lbl='💼 БИЗНЕС';col='#e8b860';}
-    let bx = startX + 100 + Math.random()*200;
-    let b = scene.physics.add.sprite(bx, groundY, tex).setOrigin(0.5,1).setDepth(-10);
-    b.body.setAllowGravity(false); b.body.setImmovable(true);
-    b.isBuilding = true; b.buildType = type;
-    let sign = scene.add.text(bx, groundY-90, lbl, {fontSize:'12px', color:col, fontStyle:'bold', backgroundColor:'#111', padding:{x:4,y:2}}).setOrigin(0.5,1).setDepth(-10);
-    objs.push(b, sign); buildings.push(b);
+    if(type==='bank'){tex='shop';lbl='🏦 БАНК';col='#88ccff';}
+    let bx = null;
+    for (let attempt = 0; attempt < 10; attempt++) { const candidate = startX + 100 + Math.random()*200; if (isPositionFree(candidate, 100)) { bx = candidate; break; } }
+    if (bx !== null) {
+      let b = scene.physics.add.sprite(bx, groundY, tex).setOrigin(0.5,1).setDepth(-10);
+      b.body.setAllowGravity(false); b.body.setImmovable(true);
+      b.isBuilding = true; b.buildType = type;
+      let sign = scene.add.text(bx, groundY-90, lbl, {fontSize:'12px', color:col, fontStyle:'bold', backgroundColor:'#111', padding:{x:4,y:2}}).setOrigin(0.5,1).setDepth(-10);
+      objs.push(b, sign); buildings.push(b);
+    }
+  }
+  if (Math.random() < 0.12) {
+    let ex = null;
+    for (let a=0;a<10;a++){ const c = startX + 50 + Math.random()*(CHUNK_W-100); if (isPositionFree(c,80)){ ex=c; break; } }
+    if (ex!==null){
+      const ent = scene.physics.add.sprite(ex, groundY, 'shop').setOrigin(0.5,1).setDepth(-9);
+      ent.body.setAllowGravity(false); ent.body.setImmovable(true);
+      ent.isBuilding = true; ent.buildType = 'entrance';
+      const sign = scene.add.text(ex, groundY-90, '🏚️ ПОДЪЕЗД', {fontSize:'12px',color:'#ccaa88',fontStyle:'bold',backgroundColor:'#111',padding:{x:4,y:2}}).setOrigin(0.5,1).setDepth(-9);
+      objs.push(ent, sign); buildings.push(ent);
+    }
+  }
+  if (Math.random() < 0.1) {
+    let hx = null;
+    for (let attempt = 0; attempt < 10; attempt++) { const candidate = startX + 50 + Math.random() * (CHUNK_W - 100); if (isPositionFree(candidate, 80)) { hx = candidate; break; } }
+    if (hx !== null) {
+      const home = scene.physics.add.sprite(hx, groundY, 'home').setOrigin(0.5, 1).setDepth(-8);
+      home.body.setAllowGravity(false); home.body.setImmovable(true); home.isHome = true;
+      buildings.push(home); objs.push(home);
+    }
   }
   if(Math.random() > 0.2){
-    let bagX = startX + 200 + (Math.random()*100 - 50);
-    const bag = scene.physics.add.sprite(bagX, groundY, 'trash_bags').setOrigin(0.5,1);
-    bag.body.setAllowGravity(false); bag.body.setImmovable(true);
-    bag.looted = false; bag.isTrash = true; bag.setDepth(-5);
-    trashBags.push(bag); objs.push(bag);
+    let bagX = null;
+    for (let attempt = 0; attempt < 10; attempt++) { const candidate = startX + 200 + (Math.random()*100 - 50); if (isPositionFree(candidate, 50)) { bagX = candidate; break; } }
+    if (bagX !== null) {
+      const bag = scene.physics.add.sprite(bagX, groundY, 'trash_bags').setOrigin(0.5,1);
+      bag.body.setAllowGravity(false); bag.body.setImmovable(true);
+      bag.looted = false; bag.isTrash = true; bag.setDepth(-5);
+      trashBags.push(bag); objs.push(bag);
+    }
   }
   if (!npcChunks.has(idx)) {
     npcChunks.set(idx, true);
@@ -691,28 +1443,10 @@ function generateChunk(idx){
         npc.body.setSize(24, 48); npc.body.setOffset(4, 8);
         npc.isThug = false; npc.isNpc = true; npc.hp = 20; npc.maxHp = 20;
         npc.didDrop = false; npc.dir = Math.random() > 0.5 ? 1 : -1; npc.isFemale = isFemale;
-        npc.setDepth(15);
-        scene.physics.add.collider(npc, groundBody);
-        npcs.push(npc);
+        npc.setDepth(15); scene.physics.add.collider(npc, groundBody); npcs.push(npc);
       }
-      if (Math.random() < 0.3) {
-        const dog = scene.physics.add.sprite(startX + 50 + Math.random()*(CHUNK_W-100), NPC_Y - 10, 'npc_dog');
-        dog.body.setSize(40, 32);
-        dog.isNpc = true; dog.isThug = false; dog.isAnimal = true; dog.hp = 15;
-        dog.dir = Math.random() > 0.5 ? 1 : -1;
-        dog.setDepth(15);
-        scene.physics.add.collider(dog, groundBody);
-        npcs.push(dog);
-      }
-      if (Math.random() < 0.5) {
-        const rat = scene.physics.add.sprite(startX + 50 + Math.random()*(CHUNK_W-100), NPC_Y + 10, 'npc_rat');
-        rat.body.setSize(24, 16);
-        rat.isNpc = true; rat.isThug = false; rat.isAnimal = true; rat.hp = 5;
-        rat.dir = Math.random() > 0.5 ? 1 : -1;
-        rat.setDepth(15);
-        scene.physics.add.collider(rat, groundBody);
-        npcs.push(rat);
-      }
+      if (Math.random() < 0.3) { const dog = scene.physics.add.sprite(startX + 50 + Math.random()*(CHUNK_W-100), NPC_Y - 10, 'npc_dog'); dog.body.setSize(40, 32); dog.isNpc = true; dog.isThug = false; dog.isAnimal = true; dog.hp = 15; dog.maxHp = 15; dog.dir = Math.random() > 0.5 ? 1 : -1; dog.setDepth(15); scene.physics.add.collider(dog, groundBody); npcs.push(dog); }
+      if (Math.random() < 0.5) { const rat = scene.physics.add.sprite(startX + 50 + Math.random()*(CHUNK_W-100), NPC_Y + 10, 'npc_rat'); rat.body.setSize(24, 16); rat.isNpc = true; rat.isThug = false; rat.isAnimal = true; rat.hp = 5; rat.maxHp = 5; rat.dir = Math.random() > 0.5 ? 1 : -1; rat.setDepth(15); scene.physics.add.collider(rat, groundBody); npcs.push(rat); }
     } else {
       if (Math.random() < 0.5) {
         const count = 1 + Math.floor(Math.random()*2);
@@ -723,9 +1457,7 @@ function generateChunk(idx){
           npc.body.setSize(24, 48); npc.body.setOffset(4, 8);
           npc.isThug = true; npc.isNpc = true; npc.isBoss = false; npc.isFemale = isFemale;
           npc.hp = 30; npc.maxHp = 30; npc.dir = Math.random() > 0.5 ? 1 : -1;
-          npc.setDepth(15);
-          scene.physics.add.collider(npc, groundBody);
-          npcs.push(npc);
+          npc.setDepth(15); scene.physics.add.collider(npc, groundBody); npcs.push(npc);
         }
       }
       if (Math.random() < 0.05) {
@@ -733,10 +1465,8 @@ function generateChunk(idx){
         const npc = scene.physics.add.sprite(bx, NPC_Y - 24, 'npc_boss');
         npc.body.setSize(48, 72); npc.body.setOffset(0, 0);
         npc.isThug = true; npc.isNpc = true; npc.isBoss = true; npc.isFemale = false;
-        npc.hp = 150; npc.maxHp = 150;
-        npc.setDepth(15);
-        scene.physics.add.collider(npc, groundBody);
-        npcs.push(npc);
+        npc.hp = 150; npc.maxHp = 150; npc.setDepth(15);
+        scene.physics.add.collider(npc, groundBody); npcs.push(npc);
         log('⚠️ Появился БОСС!');
       }
     }
@@ -747,183 +1477,278 @@ function generateChunk(idx){
 function unloadChunk(idx){
   if(!loadedChunks.has(idx)) return;
   loadedChunks.get(idx).forEach(o=>{ if(o.active){ if(o.hpBar) o.hpBar.destroy(); o.destroy(); } });
-  // ПАТЧ: удаляем NPC этого чанка
-  npcs = npcs.filter(n=>{
-    if(!n.active) return false;
-    if(Math.floor(n.x / CHUNK_W) === idx){
-      if(n.hpBar) n.hpBar.destroy();
-      n.destroy();
-      return false;
-    }
-    return true;
-  });
+  npcs = npcs.filter(n=>{ if(!n.active) return false; if(Math.floor(n.x / CHUNK_W) === idx){ if(n.hpBar) n.hpBar.destroy(); n.destroy(); return false; } return true; });
   trashBags = trashBags.filter(t=>t.active);
   buildings = buildings.filter(b=>b.active);
-  loadedChunks.delete(idx);
-  npcChunks.delete(idx); // ПАТЧ: позволяем NPC заспавниться снова
-}
-
-function updateTimeOfDay(delta){
-  worldTime += delta * 0.0017;
-  if(worldTime > 24*60){ worldTime = 0; worldDay++; }
-  const hours = Math.floor(worldTime/60), mins = Math.floor(worldTime%60);
-  const monthIndex = Math.floor((worldDay-1)/30) % 12;
-  const dayInMonth = ((worldDay-1)%30) + 1;
-  currentYear = 2024 + Math.floor((worldDay-1)/360);
-  let season='winter';
-  if(monthIndex>=2&&monthIndex<=4) season='spring';
-  else if(monthIndex>=5&&monthIndex<=7) season='summer';
-  else if(monthIndex>=8&&monthIndex<=10) season='autumn';
-  let timeStr='', skyColor=0x5dade2;
-  if(hours>=6&&hours<12){ timeStr='Утро'; skyColor=0x87CEEB; }
-  else if(hours>=12&&hours<18){ timeStr='День'; skyColor=0x5dade2; }
-  else if(hours>=18&&hours<21){ timeStr='Вечер'; skyColor=0xffaa77; }
-  else { timeStr='Ночь'; skyColor=0x0a0a1a; }
-  if(currentWeather==='rain') skyColor = hours>=6&&hours<21 ? 0x4a6a8a : 0x050510;
-  if(currentWeather==='storm') skyColor = hours>=6&&hours<21 ? 0x304050 : 0x020208;
-  if(currentWeather==='snow') skyColor = hours>=6&&hours<21 ? 0xaad0e8 : 0x1a1a2a;
-  weatherTimer += delta;
-  if(weatherTimer>30000){
-    weatherTimer = 0;
-    let r = Math.random();
-    if(season==='spring') currentWeather = r>0.6 ? 'rain' : 'clear';
-    else if(season==='summer') currentWeather = r>0.8 ? 'storm' : (r>0.5 ? 'rain' : 'clear');
-    else if(season==='autumn') currentWeather = r>0.8 ? 'storm' : (r>0.4 ? 'rain' : 'clear');
-    else currentWeather = r>0.7 ? 'snow' : 'clear';
+  loadedChunks.delete(idx); npcChunks.delete(idx);
+  if (traderNpc && traderNpc.active && Math.floor(traderNpc.x / CHUNK_W) === idx) { traderNpc.destroy(); traderNpc = null; }
+  // ИСПРАВЛЕНО: не удаляем собаку-питомца при выгрузке чанка; перемещаем к игроку
+  if (petDogSprite && petDogSprite.active && Math.floor(petDogSprite.x / CHUNK_W) === idx) {
+    petDogSprite.x = player.x - 40;
+    petDogSprite.y = player.y - 20;
   }
-  if(currentWeather==='storm' && Math.random()<0.005) lightningAlpha = 0.8;
-  if(lightningAlpha > 0){ lightningAlpha -= delta*0.005; if(lightningAlpha < 0) lightningAlpha = 0; }
-  let icon = '☀️'; if(currentWeather==='rain') icon='🌧️'; if(currentWeather==='snow') icon='❄️'; if(currentWeather==='storm') icon='⛈️';
-  const dayIndex = (worldDay-1) % 7;
-  document.getElementById('timeText').textContent = `${String(hours).padStart(2,'0')}:${String(mins).padStart(2,'0')} (${timeStr})`;
-  document.getElementById('dayText').textContent = `${daysOfWeek[dayIndex]}, ${dayInMonth} ${months[monthIndex]} ${currentYear}`;
-  document.getElementById('weatherText').textContent = `${icon} ${currentWeather==='clear'?'Ясно':currentWeather==='rain'?'Дождь':currentWeather==='snow'?'Снег':'Гроза'}`;
-  const scene = game.scene.scenes[0];
-  if(scene && scene.cameras && scene.cameras.main) scene.cameras.main.setBackgroundColor(skyColor);
-  // ПАТЧ: только окна из litWindows
-  const isNight = (hours>=21 || hours<6);
-  for (let i = litWindows.length - 1; i >= 0; i--) {
-    const w = litWindows[i];
-    if (!w.active) { litWindows.splice(i,1); continue; }
-    const target = isNight ? (w.isLit ? w.litColor : w.baseColor) : w.baseColor;
-    if (w.fillColor !== target) w.setFillStyle(target);
-  }
-  const newPhase = getTodPhase();
-  if(newPhase !== lastPhase){
-    lastPhase = newPhase;
-    if(newPhase==='night') log('🌙 Ночь.');
-    else if(newPhase==='morning') log('🌅 Утро.');
-    else if(newPhase==='noon') log('☀️ День.');
-    else if(newPhase==='evening') log('🌇 Вечер.');
+  // ИСПРАВЛЕНО: чистим банку бомжа при выгрузке
+  if (beggarNpc && beggarNpc.active && Math.floor(beggarNpc.x / CHUNK_W) === idx) {
+    if (beggarNpc.begCan) beggarNpc.begCan.destroy();
+    beggarNpc.destroy();
+    beggarNpc = null;
   }
 }
 
-function updateWeatherParticles(delta){
-  if(!weatherLayer) return;
-  weatherLayer.clear();
-  const W = game.scene.scenes[0].scale.width, H = game.scene.scenes[0].scale.height;
-  if(lightningAlpha > 0){ weatherLayer.fillStyle(0xffffff, lightningAlpha); weatherLayer.fillRect(0,0,W,H); }
-  if(currentWeather==='rain'||currentWeather==='storm'){ for(let i=0;i<5;i++) if(weatherParticles.length<200) weatherParticles.push({x:Math.random()*W,y:-10,vx:-0.5,vy:10+Math.random()*5,type:'rain',size:1+Math.random()*1.5,life:2000}); }
-  else if(currentWeather==='snow'){ for(let i=0;i<3;i++) if(weatherParticles.length<150) weatherParticles.push({x:Math.random()*W,y:-10,vx:(Math.random()-0.5)*0.8,vy:1.5+Math.random()*1.5,type:'snow',size:1.5+Math.random()*2,life:10000,wobble:Math.random()*Math.PI*2}); }
-  for(let i=weatherParticles.length-1;i>=0;i--){
-    const p = weatherParticles[i];
-    p.x += p.vx; p.y += p.vy; p.life -= delta;
-    if(p.type==='snow'){ p.wobble += 0.02; p.x += Math.sin(p.wobble)*0.4; }
-    if(p.y>H+20||p.life<=0){ weatherParticles.splice(i,1); continue; }
-    if(p.type==='rain'){ weatherLayer.fillStyle(0xaaddff,0.7); weatherLayer.fillRect(p.x,p.y,p.size,10); }
-    else if(p.type==='snow'){ weatherLayer.fillStyle(0xffffff,0.9); weatherLayer.fillCircle(p.x,p.y,p.size); }
+function renderHUD(){
+  if(isDead) return;
+  document.getElementById('hpbar').style.width=(state.hp/state.maxHp*100)+'%';
+  document.getElementById('hungerbar').style.width=state.hunger+'%';
+  document.getElementById('waterbar').style.width=state.water+'%';
+  document.getElementById('btnThrow').style.display=(invCount('bottle')>0||invCount('rozochka')>0)?'flex':'none';
+  document.getElementById('recDays').textContent=records.days;
+  document.getElementById('recCoins').textContent=records.coins;
+  document.getElementById('recKills').textContent=records.kills;
+  document.getElementById('recBosses').textContent=records.bosses;
+  document.getElementById('recBiz').textContent=records.biz;
+  document.getElementById('reputationText').textContent = state.reputation;
+}
+
+function switchRecTab(tab){
+  document.getElementById('recTabScores').classList.toggle('active', tab === 'scores');
+  document.getElementById('recTabAchieves').classList.toggle('active', tab === 'achieves');
+  document.getElementById('recScoresView').style.display = tab === 'scores' ? '' : 'none';
+  document.getElementById('recAchievesView').style.display = tab === 'achieves' ? '' : 'none';
+  if (tab === 'achieves') renderAchievements();
+}
+
+function renderAchievements(){
+  const list = document.getElementById('achieveList');
+  if (!list) return;
+  list.innerHTML = '';
+  for (const a of ALL_ACHIEVEMENTS) {
+    const have = state.achievements.includes(a.id);
+    const row = document.createElement('div');
+    row.className = 'record-row';
+    row.style.opacity = have ? '1' : '0.35';
+    row.innerHTML = `<span>${a.icon} ${a.name}</span> <span class="record-val" style="font-size:11px;text-align:right;max-width:50%;">${a.desc}</span>`;
+    list.appendChild(row);
   }
 }
 
-function startHide(){
-  if(isHiding) return;
-  isHiding = true;
-  document.getElementById('hideOverlay').style.display='flex';
-  worldTime = 6*60;
-  worldDay++;
-  updateRecords();
-  setTimeout(()=>{
-    isHiding = false;
-    document.getElementById('hideOverlay').style.display='none';
-    log('Ночь прошла.');
-  }, 3000);
+// ИСПРАВЛЕНО: защита от утечки слушателей
+let _actionMenuCloser = null;
+function openItemActionMenu(x, y, slotIndex, itemId){
+  const menu = document.getElementById('actionMenu');
+  menu.innerHTML = '';
+  menu.style.display = 'flex';
+  menu.style.left = Math.min(window.innerWidth - 160, x) + 'px';
+  menu.style.top = Math.max(10, y - 100) + 'px';
+
+  const it = ITEMS[itemId];
+  const title = document.createElement('div');
+  title.style.padding = '4px 8px'; title.style.fontSize = '12px'; title.style.color = '#e8b860'; title.style.fontWeight = 'bold';
+  title.textContent = `${it.icon} ${it.name}`;
+  menu.appendChild(title);
+
+  const btnEquip = document.createElement('button');
+  btnEquip.textContent = 'Надеть';
+  btnEquip.onclick = () => { equipSlotIndex(slotIndex); menu.style.display = 'none'; };
+  menu.appendChild(btnEquip);
+
+  const btnDrop = document.createElement('button');
+  btnDrop.className = 'danger';
+  btnDrop.textContent = '🗑 Выбросить';
+  btnDrop.onclick = () => { dropFromSlot(slotIndex); menu.style.display = 'none'; };
+  menu.appendChild(btnDrop);
+
+  if (_actionMenuCloser) document.removeEventListener('click', _actionMenuCloser);
+  _actionMenuCloser = function closeMenu(e){
+    if (!menu.contains(e.target)) {
+      menu.style.display = 'none';
+      document.removeEventListener('click', _actionMenuCloser);
+      _actionMenuCloser = null;
+    }
+  };
+  setTimeout(() => { if (_actionMenuCloser) document.addEventListener('click', _actionMenuCloser); }, 100);
 }
 
-const ctxBtn = document.getElementById('ctxBtn'), ctxBtnHide = document.getElementById('ctxBtnHide'), btnSit = document.getElementById('btnSit');
+function renderInventory(){
+  document.querySelectorAll('.eq-slot').forEach(el=>{
+    const slot=el.dataset.slot, eqItem=state.equip[slot], real=el.querySelector('.real');
+    if(real) real.textContent=eqItem?ITEMS[eqItem].icon:'';
+    el.classList.toggle('active',!!eqItem);
+    if(el._bound) return; el._bound=true;
 
-function doPickup(){ game.scene.scenes[0].children.list.forEach(child=>{ if(child.isPickup && Phaser.Math.Distance.Between(player.x,player.y,child.x,child.y)<80){ invAdd(child.itemId,1); log(`Подобрано: ${ITEMS[child.itemId].icon} ${ITEMS[child.itemId].name}`); child.destroy(); } }); }
-function interact(){ if(!currentCtxTarget) return; if(currentCtxTarget.isTrash){ if(currentCtxTarget.looted){ log('Уже пусто.'); return; } if(isHiding) return; currentCtxTarget.looted = true; currentCtxTarget.destroy(); const loot=['bottle','bottle','bottle','bottle','bottle','rag','rag','metal','metal','board','nail','tape','coin','coin','water_bottle','food','plastic','glass','wire','rozochka','pipe','shiv','cap','cardboard']; let count=2+Math.floor(Math.random()*4), found=[]; for(let i=0;i<count;i++){ let item=loot[Math.floor(Math.random()*loot.length)]; invAdd(item,1); found.push(`${ITEMS[item].icon}${ITEMS[item].name}`); } log(`Порылся: ${found.join(', ')}`); } else if(currentCtxTarget.isBuilding){ openShop(currentCtxTarget.buildType); } }
-function sitDown(){ if(isSitting) return; isSitting=true; btnSit.style.display='none'; player.anims.stop(); player.setTexture('bum_sit'); player.body.setVelocityX(0); const groundY = game.scene.scenes[0].scale.height - 20; player.y = groundY - 24; sittingCan = game.scene.scenes[0].add.sprite(player.x+20, groundY-8, 'can').setDepth(5); log('Сел просить...'); document.getElementById('btnAttack').style.display='none'; }
-function standUp(){ if(!isSitting) return; isSitting=false; player.setTexture('bum_idle'); if(sittingCan){ sittingCan.destroy(); sittingCan=null; } document.getElementById('btnAttack').style.display='flex'; log('Встал.'); }
-btnSit.onclick = ()=>{ if(isSitting) standUp(); else sitDown(); };
+    let lastTap = 0;
+    el.onclick = () => {
+      const now = Date.now();
+      if (now - lastTap < 300) {
+        unequip(slot);
+        hideTooltip();
+      } else {
+        if(eqItem && document.getElementById('tooltip').style.display === 'block') hideTooltip();
+        else { const r = el.getBoundingClientRect(); if(eqItem) showTooltip(eqItem, r.left + r.width/2, r.top); }
+      }
+      lastTap = now;
+    };
+    el.onmouseleave = hideTooltip;
+  });
 
-function updateCtxUI(){
-  let closest=null, minDist=100;
-  trashBags.forEach(bag=>{ if(!bag.active) return; let d=Phaser.Math.Distance.Between(player.x,player.y,bag.x,bag.y); if(d<minDist){ minDist=d; closest={obj:bag,isTrash:true}; } });
-  buildings.forEach(b=>{ if(!b.active) return; let d=Phaser.Math.Distance.Between(player.x,player.y,b.x,b.y); if(d<minDist){ minDist=d; closest={obj:b,isBuilding:true}; } });
-  currentCtxTarget = closest ? closest.obj : null;
-  if(isSitting){ ctxBtn.style.display='none'; ctxBtnHide.style.display='none'; btnSit.style.display='flex'; btnSit.textContent='🚶'; }
-  else { btnSit.style.display='flex'; btnSit.textContent='🪑'; if(currentCtxTarget){ ctxBtn.style.display='flex'; if(currentCtxTarget.isTrash){ ctxBtnHide.style.display='flex'; ctxBtn.onclick=interact; ctxBtnHide.onclick=startHide; } else { ctxBtnHide.style.display='none'; ctxBtn.onclick=interact; } } else { ctxBtn.style.display='none'; ctxBtnHide.style.display='none'; } }
+  const grid=document.getElementById('invGrid');
+  grid.innerHTML='';
+  const gridWrapper = grid.parentElement;
+  if (gridWrapper && !gridWrapper._scrollBound) {
+    gridWrapper._scrollBound = true;
+    gridWrapper.addEventListener('scroll', hideTooltip);
+  }
+
+  for(let i=0;i<INV_SIZE;i++){
+    const s=state.slots[i];
+    const cell=document.createElement('div');
+    cell.className='slot'+(s?'':' empty');
+    if(s){
+      cell.textContent=ITEMS[s.id].icon;
+      if(s.count>1){ const c=document.createElement('span'); c.className='count'; c.textContent=s.count; cell.appendChild(c); }
+    }
+    let lastTap = 0;
+    let longPressTimer = null;
+    let longPressed = false;
+
+    cell.onclick = () => {
+      if (longPressed) { longPressed = false; return; }
+      const now = Date.now();
+      if (now - lastTap < 300) {
+        if(s) equipSlotIndex(i);
+        hideTooltip();
+      } else {
+        if(s && document.getElementById('tooltip').style.display === 'block') hideTooltip();
+        else { const r = cell.getBoundingClientRect(); if(s) showTooltip(s.id, r.left + r.width/2, r.top); }
+      }
+      lastTap = now;
+    };
+    cell.oncontextmenu = (e) => { e.preventDefault(); return false; };
+    cell.addEventListener('touchstart', (e) => {
+      if (!s) return;
+      longPressed = false;
+      longPressTimer = setTimeout(() => {
+        longPressed = true;
+        const r = cell.getBoundingClientRect();
+        openItemActionMenu(r.left + r.width/2, r.top, i, s.id);
+      }, 500);
+    }, { passive: true });
+    const cancelLong = () => { if (longPressTimer) clearTimeout(longPressTimer); };
+    cell.addEventListener('touchend', cancelLong);
+    cell.addEventListener('touchmove', cancelLong);
+    cell.addEventListener('touchcancel', cancelLong);
+    cell.addEventListener('mousedown', (e) => {
+      if (e.button === 2 && s) {
+        const r = cell.getBoundingClientRect();
+        openItemActionMenu(r.left + r.width/2, r.top, i, s.id);
+      }
+    });
+    cell.onmouseleave = hideTooltip;
+    grid.appendChild(cell);
+  }
 }
 
+function renderCraft(){
+  const tabs=document.getElementById('craftTabs'); tabs.innerHTML='';
+  ['weapon','armor'].forEach(cat=>{
+    const b=document.createElement('button'); b.className='craft-tab '+(currentCraftTab===cat?'active':'');
+    b.textContent=cat==='weapon'?'Оружие':'Броня';
+    b.onclick=()=>{ currentCraftTab=cat; renderCraft(); };
+    tabs.appendChild(b);
+  });
+  const cl=document.getElementById('craftList'); cl.innerHTML='';
+  RECIPES.filter(r=>r.cat===currentCraftTab).forEach(r=>{
+    const b=document.createElement('button'); b.className='recipe-btn';
+    const can=Object.entries(r.cost).every(([k,v])=>invCount(k)>=v);
+    b.disabled=!can;
+    const costHtml=Object.entries(r.cost).map(([k,v])=>`<span style="color:${invCount(k)>=v?'#8c8':'#c88'}">${ITEMS[k].icon}${v}</span>`).join(' ');
+    b.innerHTML=`<div class="title">${ITEMS[r.out].icon} ${r.label}</div><div class="cost">${costHtml}</div>`;
+    b.onclick=()=>craft(r.out); cl.appendChild(b);
+  });
+}
+function renderUI(){
+  renderHUD();
+  if(document.getElementById('invPanel').classList.contains('open')) renderInventory();
+  if(document.getElementById('craftPanel').classList.contains('open')) renderCraft();
+  if(document.getElementById('stashPanel').classList.contains('open')) renderStash();
+  if(document.getElementById('recordPanel').classList.contains('open')) {
+    if (document.getElementById('recAchievesView').style.display !== 'none') renderAchievements();
+  }
+  updateQuestBox();
+}
+
+const held={ left:false, right:false, jump:false };
+function bindHold(id,prop){ const el=document.getElementById(id); const on=e=>{e.preventDefault();held[prop]=true;el.classList.add('held');}; const off=e=>{e.preventDefault();held[prop]=false;el.classList.remove('held');}; el.addEventListener('touchstart',on,{passive:false}); el.addEventListener('touchend',off,{passive:false}); el.addEventListener('touchcancel',off,{passive:false}); el.addEventListener('mousedown',on); el.addEventListener('mouseup',off); el.addEventListener('mouseleave',off); }
+bindHold('btnLeft','left'); bindHold('btnRight','right'); bindHold('btnJump','jump');
+function tap(id,fn){ const el = document.getElementById(id); let touched = false; el.addEventListener('touchstart', e=>{ e.preventDefault(); touched = true; fn(); }, {passive:false}); el.addEventListener('click', e=>{ e.preventDefault(); if(!touched) fn(); touched = false; }); }
+tap('btnAttack',()=>doAttack()); tap('btnPick',()=>doPickup()); tap('btnThrow',()=>doThrow());
+document.getElementById('btnCraft').onclick=()=>{ document.getElementById('craftPanel').classList.add('open'); renderCraft(); };
+document.getElementById('closeCraft').onclick=()=>document.getElementById('craftPanel').classList.remove('open');
+document.getElementById('btnInv').onclick=()=>{ document.getElementById('invPanel').classList.add('open'); renderInventory(); };
+document.getElementById('closeInv').onclick=()=>{ document.getElementById('invPanel').classList.remove('open'); hideTooltip(); };
+document.getElementById('btnRecord').onclick=()=>{ document.getElementById('recordPanel').classList.add('open'); switchRecTab('scores'); };
+
+document.querySelectorAll('.modal').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) { m.classList.remove('open'); hideTooltip(); } });
+});
+
+function die(reason){
+  if (isDead) return;
+  isDead = true; state.hp = 0;
+  if (isSitting) standUp();
+  if (isHiding) { isHiding = false; document.getElementById('hideOverlay').style.display = 'none'; }
+  bossLootCache = {};
+  document.getElementById('deathScreen').style.display = 'flex';
+  document.getElementById('deathReason').textContent = reason || 'Ты не выжил...';
+  log('☠️ ' + (reason || 'Ты умер'));
+}
+function respawn(){
+  isDead = false; state.hp = 100; state.hunger = 100; state.water = 100;
+  currentKills = 0; activeQuest = null;
+  lastWarnCold = false; lastWarnHunger = false; lastWarnWater = false;
+  isHiding = false; document.getElementById('hideOverlay').style.display = 'none';
+  if (state.petDog && petDogSprite && petDogSprite.active) { petDogSprite.x = player.x - 40; petDogSprite.y = player.y - 20; }
+  document.getElementById('deathScreen').style.display = 'none';
+  log('Очнулся.'); renderUI(); updateQuestBox();
+}
 function doAttack(){
   if(!player || attackCooldown>0 || isDead || isSitting) return;
   attackCooldown = 400;
   game.scene.scenes[0].tweens.add({ targets:player, angle:player.flipX?-15:15, yoyo:true, duration:100 });
-  const wep = state.equip.weapon;
-  let dmg = 2, effect = 'punch';
+  const wep = state.equip.weapon; let dmg = 2, effect = 'punch';
   if(wep){ dmg = ITEMS[wep].dmg; effect = ITEMS[wep].effect; }
   AudioSys.play(effect);
   const dir = player.flipX ? -1 : 1;
-  if(weaponSprite.visible) game.scene.scenes[0].tweens.add({ targets:weaponSprite, angle:dir*60, yoyo:true, duration:100 });
+  if(weaponSprite && weaponSprite.visible) game.scene.scenes[0].tweens.add({ targets:weaponSprite, angle:dir*60, yoyo:true, duration:100 });
   npcs.forEach(npc=>{
     if(!npc.active) return;
     const dx = (npc.x - player.x) * dir;
     if(dx>0 && dx<80 && Math.abs(npc.y-player.y)<60){
       npc.hp -= dmg;
-      if(npc.isAnimal){
-        // ПАТЧ: животное убегает
-        npc.dir = npc.x > player.x ? 1 : -1;
-      } else if(!npc.isThug){
-        npc.isThug=true; npc.setTexture(npc.isFemale?'npc_thug_f':'npc_thug_m'); log('Прохожий в ярости!');
-      }
+      if(npc.isAnimal){ npc.dir = npc.x > player.x ? 1 : -1; }
+      else if(!npc.isThug){ npc.isThug=true; npc.setTexture(npc.isFemale?'npc_thug_f':'npc_thug_m'); log('Прохожий в ярости!'); changeReputation(-3); }
       spawnHitEffect(player.x+dir*30, player.y-10, effect);
       npc.setTint(0xff6666);
       game.scene.scenes[0].time.delayedCall(150, ()=>{ if(npc.active) npc.clearTint(); });
-      if(npc.hp<=0){ if(npc.hpBar) npc.hpBar.destroy(); spawnLoot(npc); npc.destroy(); npcs = npcs.filter(n=>n.active); if(npc.isThug) records.kills++; if(npc.isBoss) records.bosses++; updateRecords(); }
+      if(npc.hp<=0){ if(npc.hpBar) npc.hpBar.destroy(); spawnLoot(npc); npc.destroy(); npcs = npcs.filter(n=>n.active); if(npc.isThug && !npc.isBoss) { records.kills++; currentKills++; } if(npc.isBoss) records.bosses++; updateRecords(); }
     }
   });
 }
-
 function spawnLoot(npc){
   const scene = game.scene.scenes[0];
   let drops = [];
-  if(npc.isBoss){
-    drops = ['crowbar','leather_jacket','coin','coin','armor_plate','katana'];
-    Object.keys(bossLootCache).forEach(item=>{
-      drops.push(...Array(bossLootCache[item]).fill(item));
-    });
-    bossLootCache = {};
-  }
+  if(npc.isBoss){ drops = ['crowbar','leather_jacket','coin','coin','armor_plate','katana']; Object.keys(bossLootCache).forEach(item=>{ drops.push(...Array(bossLootCache[item]).fill(item)); }); bossLootCache = {}; }
   else if(npc.isThug) drops = ['pipe','shiv','cap','cardboard','rag','metal','coin','bottle','beer','hammer'];
   else if(npc.isAnimal) drops = ['food','coin'];
   else drops = ['food','water_bottle','coin','rag','cap','boots','jeans','plastic','glass'];
-
   const seen = new Set();
   const uniq = drops.filter(d => { if(seen.has(d)) return Math.random()>0.4; seen.add(d); return true; });
   const final = uniq.slice(0, 6);
   final.forEach(drop => {
-    const s = scene.add.sprite(npc.x+(Math.random()*40-20), npc.y-20, 'item_coin').setScale(1.5);
+    const s = scene.add.sprite(npc.x+(Math.random()*40-20), npc.y-20, pickupTextureFor(drop)).setScale(1.5);
     s.itemId = drop; s.isPickup = true;
-    if(drop==='food') s.setTexture('item_food');
-    else if(drop==='water_bottle') s.setTexture('item_water');
-    else if(drop==='rag') s.setTexture('item_rag_mat');
-    else if(drop==='rozochka') s.setTexture('item_rozochka');
-    else if(drop==='bottle') s.setTexture('item_bottle');
     scene.tweens.add({ targets:s, y:s.y-8, yoyo:true, repeat:-1, duration:1000 });
   });
 }
-
 function doThrow(){
   if(!player || throwCooldown>0 || isDead || isSitting) return;
   let wep=null;
@@ -938,7 +1763,6 @@ function doThrow(){
   projectiles.push(proj);
   log(`Брошена ${ITEMS[wep].name}!`);
 }
-
 function spawnHitEffect(x,y,type){
   const scene = game.scene.scenes[0];
   if(type==='slash'){ let t=scene.add.text(x,y,'///',{fontSize:'24px',color:'#fff'}).setOrigin(0.5); scene.tweens.add({targets:t,alpha:0,scaleX:2,duration:200,onComplete:()=>t.destroy()}); }
@@ -948,22 +1772,41 @@ function spawnHitEffect(x,y,type){
 }
 
 function update(time, delta){
-  if(!player || !player.body || isDead || isHiding){ if(weatherLayer) updateWeatherParticles(delta); return; }
+  if (inJail) { updateJail(delta); return; }
+  if(!player || !player.body || isHiding){ if(weatherLayer) updateWeatherParticles(delta); return; }
+  if(isDead){ if(weatherLayer) updateWeatherParticles(delta); return; }
   updateTimeOfDay(delta);
   updateWeatherParticles(delta);
+  applyWeatherEffects(delta);
+  applySeasonEffects();
+  checkWarnings();
+  checkAchievements();
+  checkWin();
+  checkQuests();
+  tickFoodAges();
+
+  if (state.reputation <= -100) {
+    policeSpawnCooldown -= delta;
+    if (policeSpawnCooldown <= 0 && (!policeChase || !policeChase.sprite || !policeChase.sprite.active)) {
+      spawnPolice();
+      policeSpawnCooldown = 10000;
+    }
+  }
+  if (policeChase) updatePoliceChase(time, delta);
+  updateDogCombat(time, delta);
+
+  if (!beggarNpc || !beggarNpc.active) {
+    if (Math.random() < 0.0002) spawnBeggar();
+  }
+
   if(businessLevel>0){
     businessTimer += delta;
-    if(businessTimer>=5000){
-      businessTimer=0;
-      state.inv['coin']=(state.inv['coin']||0)+businessLevel;
-      renderHUD();
-      if(document.getElementById('invPanel').classList.contains('open')) renderInventory();
-      log(`Бизнес принес ${businessLevel} 🪙`);
-    }
+    // ИСПРАВЛЕНО: используем invAdd, а не прямое изменение state.inv
+    if(businessTimer>=5000){ businessTimer=0; invAdd('coin', businessLevel); log(`Бизнес принес ${businessLevel} 🪙`); }
   }
   state.hunger = Math.max(0, state.hunger - delta*0.00005);
   state.water = Math.max(0, state.water - delta*0.00007);
-  if(state.hunger<=0 || state.water<=0){ state.hp -= delta*0.005; if(state.hp<=0) die('Ты умер от истощения...'); }
+  if(state.hunger<=0 || state.water<=0){ state.hp = Math.max(0, state.hp - delta*0.005); }
   const speed = 200;
   if(!isSitting){
     player.body.setVelocityX(0);
@@ -973,19 +1816,13 @@ function update(time, delta){
     const onGround = player.body.blocked.down || player.body.touching.down;
     if(held.jump && onGround){ player.body.setVelocityY(-600); held.jump=false; }
   }
-  if(state.equip.weapon && weaponSprite && !isSitting){
-    weaponSprite.setVisible(true);
-    const tex = weaponTexture(state.equip.weapon);
-    if(weaponSprite.texture.key !== tex) weaponSprite.setTexture(tex);
-    const dir = player.flipX ? -1 : 1;
-    weaponSprite.x = player.x + dir*18;
-    weaponSprite.y = player.y - 10;
-    weaponSprite.flipX = player.flipX;
-  } else if(weaponSprite) weaponSprite.setVisible(false);
+  if(state.equip.weapon && weaponSprite && !isSitting){ weaponSprite.setVisible(true); const tex = weaponTexture(state.equip.weapon); if(weaponSprite.texture.key !== tex) weaponSprite.setTexture(tex); const dir = player.flipX ? -1 : 1; weaponSprite.x = player.x + dir*18; weaponSprite.y = player.y - 10; weaponSprite.flipX = player.flipX; }
+  else if(weaponSprite) weaponSprite.setVisible(false);
   if(attackCooldown>0) attackCooldown-=delta;
   if(throwCooldown>0) throwCooldown-=delta;
   npcs.forEach(npc=>{
     if(!npc.active) return;
+    if(npc.isCop) return;
     if(npc.hp < npc.maxHp){ if(!npc.hpBar) npc.hpBar = game.scene.scenes[0].add.rectangle(npc.x,npc.y-40,30,4,0xd34b4b).setDepth(16); npc.hpBar.x=npc.x-15; npc.hpBar.y=npc.y-40; npc.hpBar.width=30*(npc.hp/npc.maxHp); }
     const dist = Phaser.Math.Distance.Between(player.x, player.y, npc.x, npc.y);
     if(!npc.isThug){
@@ -995,74 +1832,53 @@ function update(time, delta){
       else if(npc.body.blocked.down) npc.anims.play(npc.isFemale?'civ_f_walk':'civ_m_walk', true);
       if(isSitting && !npc.didDrop && dist<60 && !npc.isAnimal){
         npc.didDrop = true;
-        setTimeout(()=>{
-          const r = Math.random();
-          if(r<0.4){ invAdd('coin',1+Math.floor(Math.random()*3)); log('Прохожий бросил монетку.'); }
-          else if(r<0.8){ invAdd('food',1); log('Прохожий дал еду.'); }
-          else { const cl=['cap','rag','cardboard','boots']; let c=cl[Math.floor(Math.random()*cl.length)]; invAdd(c,1); log(`Прохожий дал ${ITEMS[c].name}.`); }
-        }, 300);
+        setTimeout(()=>{ const r = Math.random(); if(r<0.4){ invAdd('coin',1+Math.floor(Math.random()*3)); log('Прохожий бросил монетку.'); } else if(r<0.8){ invAdd('food',1); log('Прохожий дал еду.'); } else { const cl=['cap','rag','cardboard','boots']; let c=cl[Math.floor(Math.random()*cl.length)]; invAdd(c,1); log(`Прохожий дал ${ITEMS[c].name}.`); } }, 300);
       }
       return;
     }
     if(dist < 400){
       const dir = player.x > npc.x ? 1 : -1;
-      if(dist>55) npc.body.setVelocityX(dir*(npc.isBoss?150:100));
-      else npc.body.setVelocityX(0);
+      if(dist>55) npc.body.setVelocityX(dir*(npc.isBoss?150:100)); else npc.body.setVelocityX(0);
       npc.flipX = dir < 0;
       if(dist<65 && (!npc.lastAttack || time - npc.lastAttack > 1000)){
         npc.lastAttack = time;
         const dmg = npc.isBoss ? 15 : 5;
-        state.hp -= dmg;
+        state.hp = Math.max(0, state.hp - dmg);
         game.scene.scenes[0].tweens.add({ targets:npc, angle:dir<0?-20:20, yoyo:true, duration:100 });
         AudioSys.play('punch');
-        if(Math.random()<0.3){ const ph=['Эй, лох!','Гони бабки!','Ты чё тут забыл?','А ну стоять!','Пиздюлей захотел?']; log(`Гопник: «${ph[Math.floor(Math.random()*ph.length)]}»`); }
-        if(npc.isBoss){ Object.keys(state.inv).forEach(k=>{ if(k!=='coin'){ bossLootCache[k]=(bossLootCache[k]||0)+state.inv[k]; } }); state.inv={ coin: state.inv.coin }; log('Босс отобрал вещи!'); renderUI(); }
-        player.setTint(0xff0000);
-        game.scene.scenes[0].time.delayedCall(200, ()=>player.clearTint());
+        if(Math.random()<0.3){ const ph=['Эй, лох!','Гони бабки!','Ты чё тут?','Вали отсюда!']; log('💢 ' + ph[Math.floor(Math.random()*ph.length)]); }
+        if(state.hp<=0) die('Тебя забили гопники.');
       }
     }
   });
-  // ПАТЧ: безопасная итерация по снарядам
-  for(let pi = projectiles.length - 1; pi >= 0; pi--){
-    const p = projectiles[pi];
-    if(!p.active){ projectiles.splice(pi,1); continue; }
-    if(p.y > game.scene.scenes[0].scale.height || p.x < player.x-500 || p.x > player.x+500){
-      p.destroy(); projectiles.splice(pi,1); continue;
-    }
+  projectiles = projectiles.filter(p=>{
+    if(!p.active) return false;
     let hit = false;
-    for(const npc of npcs){
-      if(npc.active && Phaser.Math.Distance.Between(p.x,p.y,npc.x,npc.y)<40){
-        npc.hp -= p.dmg;
-        spawnHitEffect(p.x, p.y, 'glass');
-        AudioSys.play('glass');
-        if(p.wepType==='rozochka' && Math.random()>0.5){
-          let drop=game.scene.scenes[0].add.sprite(p.x,p.y,'item_rozochka').setScale(1.5);
-          drop.itemId='rozochka'; drop.isPickup=true;
-          game.scene.scenes[0].tweens.add({targets:drop,y:drop.y-8,yoyo:true,repeat:-1,duration:1000});
-        }
-        p.destroy(); projectiles.splice(pi,1);
-        if(npc.hp<=0){ if(npc.hpBar) npc.hpBar.destroy(); spawnLoot(npc); npc.destroy(); npcs = npcs.filter(n=>n.active); if(npc.isThug) records.kills++; if(npc.isBoss) records.bosses++; updateRecords(); }
-        hit = true;
-        break;
+    npcs.forEach(npc=>{
+      if(!npc.active||hit) return;
+      if(Phaser.Math.Distance.Between(p.x,p.y,npc.x,npc.y)<40){
+        npc.hp -= p.dmg; hit = true;
+        npc.setTint(0xff6666); game.scene.scenes[0].time.delayedCall(150, ()=>{ if(npc.active) npc.clearTint(); });
+        spawnHitEffect(p.x,p.y,'glass');
+        if(npc.hp<=0){ if(npc.hpBar) npc.hpBar.destroy(); spawnLoot(npc); npc.destroy(); npcs = npcs.filter(n=>n.active); if(npc.isThug && !npc.isBoss){ records.kills++; currentKills++; } if(npc.isBoss) records.bosses++; updateRecords(); }
       }
-    }
-    if(hit) continue;
-  }
-  const currentChunk = Math.floor(player.x / CHUNK_W);
-  for(let i=currentChunk-2; i<=currentChunk+2; i++) if(!loadedChunks.has(i)) generateChunk(i);
-  for(const [key] of loadedChunks) if(Math.abs(key-currentChunk) > 4) unloadChunk(key);
-  if(!update._ctxT) update._ctxT = 0;
-  update._ctxT += delta;
-  if(update._ctxT > 100){ update._ctxT = 0; updateCtxUI(); }
-  if(!update._t) update._t = 0;
-  update._t += delta;
-  if(update._t > 200){
-    update._t = 0;
-    renderHUD();
-    if(document.getElementById('invPanel').classList.contains('open')) renderInventory();
-    if(document.getElementById('craftPanel').classList.contains('open')) renderCraft();
-    saveGame();
-  }
+    });
+    if(hit){ p.destroy(); return false; }
+    return true;
+  });
+  // УБРАНО: дублирующий checkPolice() каждые несколько кадров
+  updateCtxUI();
+  const pcx = Math.floor(player.x / CHUNK_W);
+  for(let i = pcx-2; i<=pcx+2; i++) generateChunk(i);
+  for(const k of Array.from(loadedChunks.keys())){ if(Math.abs(k-pcx)>3) unloadChunk(k); }
+  if(Math.random()<0.0005 && !traderNpc) spawnTrader();
+  if(petDogSprite && petDogSprite.active && !isDead){ const targetX = player.x - (player.flipX?-40:40); const dx = targetX - petDogSprite.x; petDogSprite.body.setVelocityX(Math.abs(dx)>20?Math.sign(dx)*220:0); petDogSprite.flipX = dx < 0; }
+  state.dogHunger = Math.max(0, state.dogHunger - delta*0.00001);
+  if(state.dogHunger<20 && state.petDog && !window._dogHungryWarned){ window._dogHungryWarned = true; log('🐕 Собака голодна!'); }
+  if(state.dogHunger>=50) window._dogHungryWarned = false;
+  renderHUD();
+  if(state.hp<=0) die('Ты не выжил...');
+  saveGame();
 }
 </script>
 </body>
