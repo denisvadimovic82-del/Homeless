@@ -27,8 +27,8 @@
   #weatherText { font-size:calc(11px * var(--ui-scale)); color:#fff; }
   #questBox { position:absolute; top:calc(var(--safe-top) + 100px); left:50%; transform:translateX(-50%); background:rgba(40,30,20,0.9); border:2px solid var(--accent); border-radius:8px; padding:6px 12px; font-size:calc(11px * var(--ui-scale)); color:#ffe8b0; font-weight:bold; z-index:10; pointer-events:none; display:none; text-align:center; max-width:90%; }
   
-  /* ЛОГ ПОДНЯТ НАД КНОПКАМИ */
-  #log { position:absolute; bottom:calc(var(--safe-bottom) + 260px); left:0; width:100%; height:120px; background:rgba(10,12,18,0.85); border-top:2px solid var(--border); border-bottom:2px solid var(--border); padding:4px 10px; overflow-y:auto; font-size:calc(11px * var(--ui-scale)); z-index:10; pointer-events:none; color:#fff; text-shadow:1px 1px 0 #000; }
+  /* ЛОГ: ОПУЩЕН НА 10px НИЖЕ */
+  #log { position:absolute; bottom:calc(var(--safe-bottom) + 250px); left:0; width:100%; height:120px; background:rgba(10,12,18,0.85); border-top:2px solid var(--border); border-bottom:2px solid var(--border); padding:4px 10px; overflow-y:auto; font-size:calc(11px * var(--ui-scale)); z-index:10; pointer-events:none; color:#fff; text-shadow:1px 1px 0 #000; }
   #log::-webkit-scrollbar { display:none; }
 
   .tbtn, .close-btn, .craft-tab, .recipe-btn, .shop-row button, #actionMenu button,
@@ -44,33 +44,35 @@
   .close-btn:active { transform: scale(0.97); }
   .tbtn:active { background:rgba(232,184,96,0.25); border-color:var(--accent); color:var(--accent); }
 
-  /* ===== СЕТКА КНОПОК С ОТСТУПАМИ ===== */
-  /* Шаг сетки: 58px по горизонтали (56 + 2 отступ), 60px по вертикали (56 + 4 отступ) */
+  /* ===== СЕТКА КНОПОК: ОТСТУП УВЕЛИЧЕН В 3 РАЗА ===== */
+  /* Шаг: 66px по горизонтали (56 + 10 отступ), 76px по вертикали (56 + 20 отступ) */
   .tbtn { position:absolute; width:calc(56px * var(--ui-scale)); height:calc(56px * var(--ui-scale)); background:var(--panel); border:2px solid var(--border); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:calc(20px * var(--ui-scale)); color:#ccc; z-index:20; }
   
   /* ЛЕВАЯ СТОРОНА (ДВИЖЕНИЕ) */
-  #btnLeft { left:calc(var(--safe-left) + 14px); bottom:calc(var(--safe-bottom) + 14px); }
-  #btnRight{ left:calc(var(--safe-left) + 72px); bottom:calc(var(--safe-bottom) + 14px); }
-  #btnJump { left:calc(var(--safe-left) + 43px); bottom:calc(var(--safe-bottom) + 74px); }
-  #btnRecord { left:calc(var(--safe-left) + 14px); bottom:calc(var(--safe-bottom) + 134px); background:#2a3a4a; border-color:#4a5a8a; }
+  /* Рекорды, прыжок, влево — в один ряд */
+  #btnRecord { left:calc(var(--safe-left) + 14px); bottom:calc(var(--safe-bottom) + 14px); background:#2a3a4a; border-color:#4a5a8a; }
+  #btnJump { left:calc(var(--safe-left) + 80px); bottom:calc(var(--safe-bottom) + 14px); }
+  #btnLeft { left:calc(var(--safe-left) + 146px); bottom:calc(var(--safe-bottom) + 14px); }
+  /* Вправо — над кнопкой влево */
+  #btnRight { left:calc(var(--safe-left) + 146px); bottom:calc(var(--safe-bottom) + 90px); }
 
   /* ПРАВАЯ СТОРОНА (ДЕЙСТВИЯ) */
   /* 1-й ряд (снизу) */
   #btnPick { right:calc(var(--safe-right) + 14px); bottom:calc(var(--safe-bottom) + 14px); }
-  #btnCraft { right:calc(var(--safe-right) + 72px); bottom:calc(var(--safe-bottom) + 14px); }
-  #btnThrow { right:calc(var(--safe-right) + 130px); bottom:calc(var(--safe-bottom) + 14px); background:#3a2a1a; border-color:#8a5a2a; display:none; }
+  #btnCraft { right:calc(var(--safe-right) + 80px); bottom:calc(var(--safe-bottom) + 14px); }
+  #btnThrow { right:calc(var(--safe-right) + 146px); bottom:calc(var(--safe-bottom) + 14px); background:#3a2a1a; border-color:#8a5a2a; display:none; }
 
   /* 2-й ряд (середина) */
-  #btnAttack { right:calc(var(--safe-right) + 14px); bottom:calc(var(--safe-bottom) + 74px); }
-  #btnInv { right:calc(var(--safe-right) + 72px); bottom:calc(var(--safe-bottom) + 74px); }
-  #btnDog { right:calc(var(--safe-right) + 130px); bottom:calc(var(--safe-bottom) + 74px); background:#3a2a1a; border-color:#c8a050; display:none; }
+  #btnAttack { right:calc(var(--safe-right) + 14px); bottom:calc(var(--safe-bottom) + 90px); }
+  #btnInv { right:calc(var(--safe-right) + 80px); bottom:calc(var(--safe-bottom) + 90px); }
+  #btnDog { right:calc(var(--safe-right) + 146px); bottom:calc(var(--safe-bottom) + 90px); background:#3a2a1a; border-color:#c8a050; display:none; }
   #btnDog.feed { border-color:#6c6; box-shadow:0 0 10px rgba(108,204,108,0.5); }
   #btnDog:disabled { opacity:0.4; filter:grayscale(0.7); }
 
   /* 3-й ряд (сверху) */
-  #btnSit { right:calc(var(--safe-right) + 14px); bottom:calc(var(--safe-bottom) + 134px); background:#4a3a2a; border-color:#8a6a4a; }
-  #ctxBtn { right:calc(var(--safe-right) + 72px); bottom:calc(var(--safe-bottom) + 134px); background:#2a4a2a; border-color:#4a8a4a; display:none; }
-  #ctxBtnHide { right:calc(var(--safe-right) + 130px); bottom:calc(var(--safe-bottom) + 134px); background:#2a2a4a; border-color:#4a4a8a; display:none; }
+  #btnSit { right:calc(var(--safe-right) + 14px); bottom:calc(var(--safe-bottom) + 166px); background:#4a3a2a; border-color:#8a6a4a; }
+  #ctxBtn { right:calc(var(--safe-right) + 80px); bottom:calc(var(--safe-bottom) + 166px); background:#2a4a2a; border-color:#4a8a4a; display:none; }
+  #ctxBtnHide { right:calc(var(--safe-right) + 146px); bottom:calc(var(--safe-bottom) + 166px); background:#2a2a4a; border-color:#4a4a8a; display:none; }
 
   #deathScreen { position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.95); display:none; align-items:center; justify-content:center; flex-direction:column; color:#d34b4b; font-family:monospace; text-align:center; padding:20px; }
   #deathScreen h1 { font-size:40px; margin-bottom:20px; text-shadow:0 0 20px #d34b4b; }
